@@ -1,2 +1,5 @@
 # vulcmp
-simple C library for easy GPU computing
+
+Simple C library for easy GPU computing. 
+
+See Documentation.md for usage details
