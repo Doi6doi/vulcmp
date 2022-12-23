@@ -82,7 +82,7 @@ Wait for task to terminate.
 **VcpStr**: shorthand for const char *
 **VcpFlag**: [initialization flag](#initialization-flags)
 **VcpScorer**: function which returns a score for an object to help vulcmp select the best. 
-Larger value is better, less than zero value means object is not suitable, so it wont be selected
+ Larger value is better, less than zero value means object is not suitable, so it wont be selected
 
 ## Less important functions
 
