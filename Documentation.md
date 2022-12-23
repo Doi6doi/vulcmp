@@ -9,29 +9,29 @@ It is a wrapper around the Vulkan library but it is much easier to learn and use
 * [Less important functions](#less-important-functions)
 * [Initialization flags](#initialization-flags)
 * [Error codes](#error-codes)
-* [Example](#example code)
+* [Example code](#example-code)
 
 ## Important types
 
-VcpVulcomp - opaque type handle for GPU access
-VcpStorage - opaque type handle for GPU accessible memory
-VcpTask - opaque type handle for GPU task (program)
+**VcpVulcomp**: opaque type handle for GPU access
+**VcpStorage**: opaque type handle for GPU accessible memory
+**VcpTask**: opaque type handle for GPU task (program)
 
 ## Important functions
 
     int vcp_error()
-Returns [error code](error-codes) of last call. 0 means no error.
+Returns [error code](#error-codes) of last call. 0 means no error.
 
 ---
     VcpVulcomp vcp_init( VcpStr appName, uint32_t flags )
 GPU initialization.
 - *appName*: name of your application
-- *flags*: bitmask of VcpFlags
+- *flags*: bitmask of *VcpFlags*
 - *returns* handle to GPU processing
 
 ---
     void vcp_done()
-End of GPU usage
+End of GPU usage. Also frees up all corresponding storages and tasks.
 
 ---
     VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size )
@@ -79,9 +79,10 @@ Wait for task to terminate.
 
 ## Less important types
 
-VcpStr - shorthand for const char *
-VcpFlags - initialization flags
-VcpScorer - function which returns a score for an object to help vulcmp select the best. Larger value is better, less than zero value means object is not suitable, so it wont be selected
+**VcpStr**: shorthand for const char *
+**VcpFlag**: [initialization flag](#initialization-flags)
+**VcpScorer**: function which returns a score for an object to help vulcmp select the best. 
+Larger value is better, less than zero value means object is not suitable, so it wont be selected
 
 ## Less important functions
 
@@ -125,21 +126,21 @@ Checks last error code (*vcp_error*) and terminates program with an error messag
 
 The following flags can be used in *vcp_init*
 
-- *VCP_VALIDATION*: program will use vulkan validation layer and show validation errors.
+- **VCP_VALIDATION**: program will use vulkan validation layer and show validation errors.
 
 ## Error codes
 
-Any vulkan error codes can appear as a result of *vcp_error*. There are also some vulcmp specific codes:
+Any vulkan [VkResult](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkResult.html) code can appear as a result of *vcp_error*. There are also some vulcmp specific codes:
 
-- *VCP_SUCCESS*: last operation terminated successfully. Same as *VK_SUCCESS*
-- *VCP_TIMEOUT*: *vcp_task_wait* timeouted. Same as *VK_TIMEOUT*
-- *VCP_NOPHYSICAL*: no suitable physical devices found
-- *VCP_NOFAMILY*: no suitable queue families found
-- *VCP_NOMEMORY*: no suitable GPU memory found
-- *VCP_NOFILE*: file could not be read in *vcp_task_create_file*
-- *VCP_RUNNIG*: function could not be called because task is alread running
-- *VCP_NOGROUP*: a group size is 0
-- *VCP_NOSTORAGE*: storage buffers havent been chosen with *vcp_task_setup* before starting task
+- **VCP_SUCCESS**: last operation terminated successfully. Same as *VK_SUCCESS*
+- **VCP_TIMEOUT**: *vcp_task_wait* timeouted. Same as *VK_TIMEOUT*
+- **VCP_NOPHYSICAL**: no suitable physical devices found
+- **VCP_NOFAMILY**: no suitable queue families found
+- **VCP_NOMEMORY**: no suitable GPU memory found
+- **VCP_NOFILE**: file could not be read in *vcp_task_create_file*
+- **VCP_RUNNIG**: function could not be called because task is alread running
+- **VCP_NOGROUP**: a group size is 0
+- **VCP_NOSTORAGE**: storage buffers havent been chosen with *vcp_task_setup* before starting task
 
 ## Example code
    
@@ -147,21 +148,21 @@ A vulcmp program more or less would have the following structure:
 
     // initialize GPU
     VcpVulcomp v = vcp_init( "vcptest", VCP_VALIDATION );
-    /// allocate GPU memory
+    // allocate GPU memory
     VcpStorage s = vcp_storage_create( v, 320*200*4 );
-    /// create task
+    // create task
     VcpTask t = vcp_task_create_file( v, "example.spv", "main", 1 );
-    /// initialize task
+    // initialize task
     vcp_task_setup( t, &s, 320, 200, 1 );
-    /// start task
+    // start task
     vcp_task_start( t );
-    /// check if all went well
+    // check if all went well
     vcp_check_fail();
-    /// wait for termination
+    // wait for termination
     vcp_task_wait( t, 1000*60 );
-    /// use result
+    // use result
     void * data = vcp_storage_address( s );
     consume( data );
-    /// clean up
+    // clean up
     vcp_done( v );
     
