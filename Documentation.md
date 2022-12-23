@@ -11,11 +11,11 @@ VcpTask - opaque type handle for GPU task (program)
 
 ## Important functions
 
-
+---
     int vcp_error()
 Returns [error code](error-codes) of last call. 0 means no error.
 
-
+---
     VcpVulcomp vcp_init( VcpStr appName, uint32_t flags )
 GPU initialization.
 - *appName*: name of your application
