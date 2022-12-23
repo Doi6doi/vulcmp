@@ -13,15 +13,18 @@ VcpTask - opaque type handle for GPU task (program)
 
     int vcp_error()
 Returns [error code](error-codes) of last call. 0 means no error.
+
 ---
     VcpVulcomp vcp_init( VcpStr appName, uint32_t flags )
 GPU initialization.
 - *appName*: name of your application
 - *flags*: bitmask of VcpFlags
 - *returns* handle to GPU processing
+
 ---
     void vcp_done()
 End of GPU usage
+
 ---
     VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size )
 Allocate GPU accessible memory for use with tasks.
@@ -29,11 +32,13 @@ Allocate GPU accessible memory for use with tasks.
 - *size*: memory size
 - *returns* handle to allocated memory
 
+---
     void * vcp_storage_address( VcpStorage s )
 Memory address of allocated memory. It can be read or writter through this pointer.
 - *s*: memory handle
 - *returns* pointer to memory
 
+---
     VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size, VcpStr entry, uint32_t nstorage )
 Create a new GPU task.
 - *v*: GPU handle
@@ -43,6 +48,7 @@ Create a new GPU task.
 - *nstorage*: number of storage buffers accessed by the task
 - *returns* handle to task
 
+---
     void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx, uint32_t gy, uint32_t gz )
 Sets up task before starting. You need to determine the exact memory storages and group sizes before running the task.
 - *t*: task handle
@@ -51,10 +57,12 @@ Sets up task before starting. You need to determine the exact memory storages an
 - *gy*: group size in Y dimension
 - *gz*: group size in Z dimension
 
+---
     void vcp_task_start( VcpTask t )
 Start the GPU task.
 - *t*: task handle
 
+---
     bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec )
 Wait for task to terminate.
 - *t*: task handle
