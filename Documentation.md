@@ -50,9 +50,9 @@ Memory address of allocated memory. It can be read or writter through this point
     VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size, VcpStr entry, uint32_t nstorage )
 Create a new GPU task.
 - *v*: GPU handle
-- *data*: pointer to the SPIR-V code of module
-- *size*: size of SPIR-V module in bytes
-- *entry*: entry point (function name) of task in the SPIR-V code
+- *data*: pointer to the [SPIR-V](https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html) code of module
+- *size*: size of [SPIR-V](https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html) module in bytes
+- *entry*: entry point (function name) of task in the [SPIR-V](https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html) code
 - *nstorage*: number of storage buffers accessed by the task
 - *returns* handle to task
 
