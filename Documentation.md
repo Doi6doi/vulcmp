@@ -86,7 +86,7 @@ Wait for task to terminate.
 
 ## Less important functions
 
-    VcpTask vcp_task_create_file( VcpVulcomp *v*, VcpStr *filename*, VcpStr *entry*, uint32_t *nstorage* )
+    VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry, uint32_t nstorage )
 Create task directly from a file. Calls *vcp_task_create* after reading whole file to memory.
 - *v*: GPU handle
 - *filename*: filename to load
@@ -98,29 +98,29 @@ Create task directly from a file. Calls *vcp_task_create* after reading whole fi
     void vcp_select_physical( VcpVulcomp v, VcpScorer s )
 Selects best physical device for computation.
 - *v*: GPU handle
-- *s*: scorer function for a device (object will be a pointer to VkPhysicalDevice)
+- *s*: scorer function for a device (object will be a pointer to [VkPhysicalDevice](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPhysicalDevice.html))
 
 ---
     void vcp_select_queue( VcpVulcomp v, VcpScorer s)
 Selects best queue family for computation.
 - *v*: GPU handle
-- *s*: scorer function for a queue family (object will be a pointer to VkQueueFamilyProperties)
+- *s*: scorer function for a queue family (object will be a pointer to [VkQueueFamilyProperties](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkQueueFamilyProperties.html))
 
 ---
     int vcp_physical_score( void * p )
 Default score function for a physical device
-- *p*: the device to be scored. Pointer to vulkan VkPhysicalDevice
+- *p*: the device to be scored. Pointer to [VkPhysicalDevice](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPhysicalDevice.html)
 - *returns* score of physical device. Prefers discrete, intergated, virtual and cpu types in that order.
 
 ---
     int vcp_family_score**( void * f )
 Default score function for a queue family
-- *f*: the queue family to be scored. Pointer to a vulkan VkQueueFamilyProperties structure
+- *f*: the queue family to be scored. Pointer to a [VkQueueFamilyProperties](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkQueueFamilyProperties.html) structure
 - *returns* score of queue famly. Accepts only compute queues.
 
 ---
     void vcp_check_fail()
-Checks last error code (*vcp_error*) and terminates program with an error message if it was not VCP_SUCCESS or VCP_TIMEOUT.
+Checks last error code (*vcp_error*) and terminates program with an error message if it was not *VCP_SUCCESS* or *VCP_TIMEOUT*.
 
 ## Initialization flags
 
