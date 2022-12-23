@@ -1,0 +1,4 @@
+libvulcmp.so
+*.o
+Makefile
+vulcmp.geany

@@ -1,0 +1,23 @@
+ALL=mandelbrot
+VCPDIR=..
+SO=$(VCPDIR)/libvulcmp.so
+GLSLC=glslc
+RESULTS=mandelbrot.bmp mandelbrot.spv
+
+all: $(SO) $(ALL:=.run)
+
+%.run: %
+	LD_LIBRARY_PATH=$(VCPDIR) ./$<
+
+mandelbrot: mandelbrot.c simplebmp.c mandelbrot.spv
+	$(CC) -o $@ mandelbrot.c simplebmp.c -I$(VCPDIR) -L$(VCPDIR) -lvulcmp
+
+mandelbrot.spv: mandelbrot.comp
+	$(GLSLC) -o $@ $<
+
+
+$(SO):
+	cd .. && make
+
+clean:
+	$(RM) $(ALL) $(RESULTS)

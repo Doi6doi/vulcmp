@@ -1,0 +1,19 @@
+CC=gcc
+RM=rm -f
+
+build: libvulcmp.so
+
+clean:
+	$(RM) libvulcmp.so *.o
+	cd test && make clean
+
+test:
+	cd test && make
+
+%.o: %.c %.h
+	$(CC) -c -fPIC -Wall -o $@ $<
+
+libvulcmp.so: vulcmp.o
+	$(CC) -shared -o $@ $^ -lvulkan
+
+.PHONY: test
