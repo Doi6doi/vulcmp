@@ -15,9 +15,5 @@ mandelbrot: mandelbrot.c simplebmp.c mandelbrot.spv
 mandelbrot.spv: mandelbrot.comp
 	$(GLSLC) -o $@ $<
 
-
-$(SO):
-	cd .. && make
-
 clean:
 	$(RM) $(ALL) $(RESULTS)

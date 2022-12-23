@@ -1,0 +1,6 @@
+NAME=vulcmp
+VER=0.9
+ARCH=amd64
+MEMAIL=doinospam@gmail.com
+MNAME=Zoltán Várnagy
+DESC=Simple C library for easy GPU computing.

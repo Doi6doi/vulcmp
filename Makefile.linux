@@ -1,19 +1,29 @@
+include Makefile.defs
+
 CC=gcc
 RM=rm -f
 
-build: libvulcmp.so
+MLIN=make -f Makefile.linux
+MDEB=make
+LIB=lib$(NAME).so
+
+build: $(LIB)
 
 clean:
-	$(RM) libvulcmp.so *.o
-	cd test && make clean
+	$(RM) $(LIB) *.o
+	cd test && $(MLIN) clean
+	cd debian && $(MDEB) clean
 
-test:
-	cd test && make
+test: build
+	cd test && $(MLIN)
+
+debian: build
+	cd debian && $(MDEB)
 
 %.o: %.c %.h
 	$(CC) -c -fPIC -Wall -o $@ $<
 
-libvulcmp.so: vulcmp.o
+$(LIB): vulcmp.o
 	$(CC) -shared -o $@ $^ -lvulkan
 
 .PHONY: test
