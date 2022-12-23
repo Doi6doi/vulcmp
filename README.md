@@ -2,4 +2,7 @@
 
 Simple C library for easy GPU computing. 
 
-See Documentation.md for usage details
+Read Documentation.md for usage details.
+
+Read Install.md for install instructions.
+
