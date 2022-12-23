@@ -3,19 +3,19 @@
 Vulcmp is a simple C library to make it mush easier GPU computing in your programs. 
 It is a wrapper around the Vulkan library but it is much easier to learn and use.
 
-* [Important types](#important-types)
-* [Important functions](#important-functions)
-* [Less important types](#less-important-types)
-* [Less important functions](#less-important-functions)
-* [Initialization flags](#initialization-flags)
-* [Error codes](#error-codes)
-* [Example code](#example-code)
+- [Important types](#important-types)
+- [Important functions](#important-functions)
+- [Less important types](#less-important-types)
+- [Less important functions](#less-important-functions)
+- [Initialization flags](#initialization-flags)
+- [Error codes](#error-codes)
+- [Example code](#example-code)
 
 ## Important types
 
-**VcpVulcomp**: opaque type handle for GPU access
-**VcpStorage**: opaque type handle for GPU accessible memory
-**VcpTask**: opaque type handle for GPU task (program)
+- **VcpVulcomp**: opaque type handle for GPU access
+- **VcpStorage**: opaque type handle for GPU accessible memory
+- **VcpTask**: opaque type handle for GPU task (program)
 
 ## Important functions
 
