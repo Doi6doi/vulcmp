@@ -104,6 +104,12 @@ Wait for task to terminate.
 
 ## Less important functions
 
+---
+```c
+void vcp_check_fail()
+```
+Checks last error code (*vcp_error*) and terminates program with an error message if it was not *VCP_SUCCESS* or *VCP_TIMEOUT*.
+
 ```c
 VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry, uint32_t nstorage )
 ```
@@ -148,9 +154,15 @@ Default score function for a queue family. Accepts only compute queues.
 
 ---
 ```c
-void vcp_check_fail()
+void vcp_storage_free( VcpStorage s )
 ```
-Checks last error code (*vcp_error*) and terminates program with an error message if it was not *VCP_SUCCESS* or *VCP_TIMEOUT*.
+Frees up resources used by `s`. You usually don't need to call this as vulcomp frees up everything on `vcp_done`. It is only needed if you wish to save memory earlier.
+
+---
+```c
+void vcp_task_free( VcpTask t )
+```
+Frees up resources used by `t`. You usually don't need to call this as vulcomp frees up everything on `vcp_done`. It is only needed if you wish to save memory earlier.
 
 ## Initialization flags
 
