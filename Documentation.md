@@ -30,7 +30,7 @@ Returns [error code](#error-codes) of last call. 0 means no error.
 ```
 GPU initialization.
 - `appName`: name of your application
-- `flags`: bitmask of `VcpFlags`
+- `flags`: bitmask of [VcpFlags](#initialization-flags)
 - *returns* handle to GPU processing
 
 ---
