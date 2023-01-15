@@ -2,6 +2,7 @@ include Makefile.defs
 
 CC=gcc
 RM=rm -f
+EH=@echo
 
 MLIN=make -f Makefile.linux
 MDEB=make
@@ -19,6 +20,16 @@ test: build
 
 debian: build
 	cd debian && $(MDEB)
+
+help:
+	$(EH) ''
+	$(EH) 'Make targets:'
+	$(EH) '   build: build library'
+	$(EH) '   clean: clean directory'
+	$(EH) '   test: run tests'
+	$(EH) '   debian: build debian package (.deb)'
+	$(EH) ''
+
 
 %.o: %.c %.h
 	$(CC) -c -fPIC -Wall -o $@ $<

@@ -157,9 +157,24 @@ static void vcp_free_command( VcpTask t ) {
    t->command = 0;
 }	
 
+/// remove task from list
+static void vcp_task_remove( VcpTask t ) {
+   VcpVulcomp v = t->vulcomp;
+   VcpTask * tt = v->tasks;
+   int n = v->ntask;
+   for ( int i = n-1; 0 <= i; --i ) {
+	  if (tt[i] == t ) {
+		 tt[i] = tt[n-1];
+		 v->tasks = VCP_REALLOC( tt, VcpTask, n-1 );
+		 return;
+	  }
+   }
+}
+
 
 /// free up task
-static void vcp_task_free( VcpTask t ) {
+void vcp_task_free( VcpTask t ) {
+   vcp_task_remove( t );
    VkDevice d = t->vulcomp->device;
    if ( t->command )
 	  vcp_free_command( t );
@@ -192,8 +207,23 @@ static void vcp_task_free( VcpTask t ) {
    t = VCP_REALLOC( t, Vcp_Task, 0 );
 }
 
+/// remove storage from list
+static void vcp_storage_remove( VcpStorage s ) {
+   VcpVulcomp v = s->vulcomp;
+   VcpStorage * ss = v->storages;
+   int n = v->nstorage;
+   for ( int i = n-1; 0 <= i; --i ) {
+	  if (ss[i] == s ) {
+		 ss[i] = ss[n-1];
+		 v->storages = VCP_REALLOC( ss, VcpStorage, n-1 );
+		 return;
+	  }
+   }
+}
+
 /// free up storage
-static void vcp_storage_free( VcpStorage s ) {
+void vcp_storage_free( VcpStorage s ) {
+   vcp_storage_remove( s );
    if ( s->memory ) {
 	  vkFreeMemory( s->vulcomp->device, s->memory, NULL );
 	  s->memory = 0;
@@ -207,12 +237,10 @@ static void vcp_storage_free( VcpStorage s ) {
 
 
 void vcp_done( VcpVulcomp v ) {
-    for ( int i=0; i < v->ntask; ++i )
-       vcp_task_free( v->tasks[i] );
-	v->tasks = VCP_REALLOC( v->tasks, VcpTask, 0 );
-	for ( int i=0; i < v->nstorage; ++i )
+	for ( int i=v->nstorage-1; 0 <= i; --i )
 	   vcp_storage_free( v->storages[i] );
-	v->storages = VCP_REALLOC( v->storages, VcpStorage, 0 );
+    for ( int i=v->ntask-1; 0 <= i; --i )
+       vcp_task_free( v->tasks[i] );
 	if ( v->commands ) {
 	   vkDestroyCommandPool( v->device, v->commands, NULL );
 	   v->commands = 0;

@@ -41,6 +41,8 @@ void vcp_select_queue( VcpVulcomp, VcpScorer );
 VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size );
 /// get storage memory address
 void * vcp_storage_address( VcpStorage s );
+/// dispose storage
+void vcp_storage_free( VcpStorage s );
 /// create task
 VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, VcpStr entry,
    uint32_t nstorage );
@@ -54,5 +56,7 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages,
 void vcp_task_start( VcpTask t );
 /// wait task to finish
 bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec );
+/// dispose task
+void vcp_task_free( VcpTask t );
 
 #endif // VULCOMPH
