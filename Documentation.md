@@ -182,7 +182,7 @@ Any vulkan [VkResult](https://registry.khronos.org/vulkan/specs/1.3-extensions/m
 - `VCP_NOFAMILY`: no suitable queue families found
 - `VCP_NOMEMORY`: no suitable GPU memory found
 - `VCP_NOFILE`: file could not be read in `vcp_task_create_file`
-- `VCP_RUNNIG`: function could not be called because task is alread running
+- `VCP_RUNNING`: function could not be called because task is alread running
 - `VCP_NOGROUP`: a group size is 0
 - `VCP_NOSTORAGE`: storage buffers havent been chosen with `vcp_task_setup` before starting task
 
