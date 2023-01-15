@@ -104,12 +104,12 @@ Wait for task to terminate.
 
 ## Less important functions
 
----
 ```c
 void vcp_check_fail()
 ```
 Checks last error code (*vcp_error*) and terminates program with an error message if it was not *VCP_SUCCESS* or *VCP_TIMEOUT*.
 
+---
 ```c
 VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry, uint32_t nstorage )
 ```
