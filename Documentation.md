@@ -52,7 +52,7 @@ Allocate GPU accessible memory for use with tasks.
 ```c
 void * vcp_storage_address( VcpStorage s )
 ```
-Memory address of allocated memory. It can be read or writter through this pointer. Needs to be called after running GPU task in order to see data changes.
+Memory address of allocated memory. It can be read or written through this pointer. Needs to be called after running GPU task in order to see data changes.
 - `s`: memory handle
 - *returns* pointer to memory
 
