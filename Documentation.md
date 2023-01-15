@@ -157,12 +157,14 @@ Default score function for a queue family. Accepts only compute queues.
 void vcp_storage_free( VcpStorage s )
 ```
 Frees up resources used by `s`. You usually don't need to call this as vulcomp frees up everything on `vcp_done`. It is only needed if you wish to save memory earlier.
+- `s`: storage to dispose
 
 ---
 ```c
 void vcp_task_free( VcpTask t )
 ```
 Frees up resources used by `t`. You usually don't need to call this as vulcomp frees up everything on `vcp_done`. It is only needed if you wish to save memory earlier.
+- `t`: task to dispose
 
 ## Initialization flags
 
