@@ -1,12 +1,16 @@
 # Compilation
 
-Find a suitable makefile for your architecture in the project source (e.g `Makefile.linux`). 
+## Linux
 
-Create a copy named `Makefile` of that file.
+Run `make -f Makefile.linux` to build *vulcmp* library
 
-Run `make` to build *vulcmp* library.
+You can run `make -f Makefile.linux help` to see other possible targets 
 
-You can run `make help` to see other possible targets
+## MSVC
+
+Run `nmake /f Makefile.msvc` to build *vulcmp* library
+
+You can run `nmake /f Makefile.msvc help` to see other possible targets
 
 # Installation
 
