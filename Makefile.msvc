@@ -6,6 +6,7 @@ CCARGS=-I$(VKPATH)\Include
 CC=cl $(CCARGS)
 LN=link /dll /LIBPATH:"$(LIB)"
 RM=del /q
+EH=@echo
 
 MMSVC=nmake /f Makefile.msvc
 MDEB=make
@@ -21,6 +22,15 @@ clean:
 test: build
 	cd test
 	$(MMSVC)
+
+help:
+	$(EH):
+	$(EH) Make targets:
+	$(EH):
+	$(EH) build: build library
+	$(EH) clean: clean directory
+	$(EH) test: run tests
+	$(EH):
 
 {$S}.c{$O}.obj:
 	$(CC) -c $O $<
