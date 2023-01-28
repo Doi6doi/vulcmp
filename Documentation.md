@@ -30,7 +30,7 @@ Returns [error code](#error-codes) of last call. 0 means no error.
 ```
 GPU initialization.
 - `appName`: name of your application
-- `flags`: bitmask of `VcpFlags`
+- `flags`: bitmask of [VcpFlags](#initialization-flags)
 - *returns* handle to GPU processing
 
 ---
@@ -52,7 +52,7 @@ Allocate GPU accessible memory for use with tasks.
 ```c
 void * vcp_storage_address( VcpStorage s )
 ```
-Memory address of allocated memory. It can be read or writter through this pointer. Needs to be called after running GPU task in order to see data changes.
+Memory address of allocated memory. It can be read or written through this pointer. Needs to be called after running GPU task in order to see data changes.
 - `s`: memory handle
 - *returns* pointer to memory
 
@@ -105,6 +105,12 @@ Wait for task to terminate.
 ## Less important functions
 
 ```c
+void vcp_check_fail()
+```
+Checks last error code (*vcp_error*) and terminates program with an error message if it was not *VCP_SUCCESS* or *VCP_TIMEOUT*.
+
+---
+```c
 VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry, uint32_t nstorage )
 ```
 Create task directly from a file. Calls *vcp_task_create* after reading whole file to memory.
@@ -148,9 +154,17 @@ Default score function for a queue family. Accepts only compute queues.
 
 ---
 ```c
-void vcp_check_fail()
+void vcp_storage_free( VcpStorage s )
 ```
-Checks last error code (*vcp_error*) and terminates program with an error message if it was not *VCP_SUCCESS* or *VCP_TIMEOUT*.
+Frees up resources used by `s`. You usually don't need to call this as vulcomp frees up everything on `vcp_done`. It is only needed if you wish to save memory earlier.
+- `s`: storage to dispose
+
+---
+```c
+void vcp_task_free( VcpTask t )
+```
+Frees up resources used by `t`. You usually don't need to call this as vulcomp frees up everything on `vcp_done`. It is only needed if you wish to save memory earlier.
+- `t`: task to dispose
 
 ## Initialization flags
 
@@ -168,7 +182,7 @@ Any vulkan [VkResult](https://registry.khronos.org/vulkan/specs/1.3-extensions/m
 - `VCP_NOFAMILY`: no suitable queue families found
 - `VCP_NOMEMORY`: no suitable GPU memory found
 - `VCP_NOFILE`: file could not be read in `vcp_task_create_file`
-- `VCP_RUNNIG`: function could not be called because task is alread running
+- `VCP_RUNNING`: function could not be called because task is already running
 - `VCP_NOGROUP`: a group size is 0
 - `VCP_NOSTORAGE`: storage buffers havent been chosen with `vcp_task_setup` before starting task
 

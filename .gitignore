@@ -1,6 +1,6 @@
 libvulcmp.so
 *.o
-./Makefile
+Makefile
 vulcmp.geany
 /test/*.obj
 /*.obj
