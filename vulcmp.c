@@ -5,8 +5,8 @@
 #include "stdio.h"
 #include "string.h"
 
-#define VCP_DEBUG( args... ) { fprintf(stderr,args); }
-#define VCP_FAIL( args... ) { VCP_DEBUG(args); exit(1); }
+#define VCP_DEBUG( ... ) { fprintf(stderr, __VA_ARGS__ ); }
+#define VCP_FAIL( ... ) { VCP_DEBUG( __VA_ARGS__ ); exit(1); }
 #define VCP_REALLOC( p, type, n ) (type *)realloc( p, n*sizeof(type) )
 
 VkResult vcpResult = VK_SUCCESS;
@@ -101,7 +101,11 @@ void vcp_select_physical( VcpVulcomp v, VcpScorer s ) {
    if (( vcpResult = vkEnumeratePhysicalDevices( 
       v->instance, & nphys, NULL )))
       return;
-   VkPhysicalDevice phys[nphys];
+   VkPhysicalDevice * phys = VCP_REALLOC( NULL, VkPhysicalDevice, nphys );
+   if ( ! phys ) {
+      vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
+	  return;
+   }
    if (( vcpResult = vkEnumeratePhysicalDevices( 
       v->instance, & nphys, phys )))
       return;
@@ -117,6 +121,7 @@ void vcp_select_physical( VcpVulcomp v, VcpScorer s ) {
    }
    if ( ! v->physical )
       vcpResult = VCP_NOPHYSICAL;
+   phys = VCP_REALLOC( phys, VkPhysicalDevice, 0 );
 }	
 
 
@@ -124,7 +129,11 @@ void vcp_select_family( VcpVulcomp v, VcpScorer s ) {
    uint32_t nqfam;
    vkGetPhysicalDeviceQueueFamilyProperties(
       v->physical, &nqfam, 0 );
-   VkQueueFamilyProperties qfams[nqfam];   
+   VkQueueFamilyProperties * qfams = VCP_REALLOC( NULL, VkQueueFamilyProperties, nqfam );
+   if ( ! qfams ) {
+      vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
+	  return;
+   }
    vkGetPhysicalDeviceQueueFamilyProperties(
       v->physical, &nqfam, qfams );
    int best = -1;
@@ -139,6 +148,7 @@ void vcp_select_family( VcpVulcomp v, VcpScorer s ) {
    }
    if ( 0 > v->family )
 	  vcpResult = VCP_NOFAMILY;
+   qfams = VCP_REALLOC( qfams, VkQueueFamilyProperties, 0 );
 }
 
 int vcp_error() {

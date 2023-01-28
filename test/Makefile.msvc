@@ -1,0 +1,22 @@
+!include ..\Makefile.defs
+
+VKPATH=$(VK_SDK_PATH)
+VCMP=..\vulcmp.obj
+
+CC=cl -I..
+LN=link /LIBPATH:"$(LIB)"
+RM=del /q
+
+ALL=$(MADEL)
+GLSLC=$(VKPATH)\Bin\glslc.exe
+RESULTS=mandelbrot.bmp mandelbrot.spv
+
+run: mandelbrot.exe
+	mandelbrot.exe
+
+{$S}.c{$O}.exe:
+	$(CC) $< $(VCMP) $(VKPATH)\Lib\vulkan-1.lib
+
+clean:
+	$(RM) $(ALL) $(RESULTS)
+
