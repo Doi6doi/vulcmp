@@ -2,10 +2,10 @@
 
 #include <stdio.h>
 
-#define VPACKED 
-
 #ifdef __GNUC__
    #define VPACKED __attribute__((__packed__))
+#else
+   #define VPACKED
 #endif
 
 #ifdef _MSC_VER
