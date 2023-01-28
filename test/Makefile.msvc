@@ -7,15 +7,18 @@ CC=cl -I..
 LN=link /LIBPATH:"$(LIB)"
 RM=del /q
 
-ALL=$(MADEL)
+ALL=mandelbrot.exe
 GLSLC=$(VKPATH)\Bin\glslc.exe
-RESULTS=mandelbrot.bmp mandelbrot.spv
+RESULTS=mandelbrot.bmp mandelbrot.cmp
 
-run: mandelbrot.exe
+run: $(ALL)
 	mandelbrot.exe
 
-{$S}.c{$O}.exe:
-	$(CC) $< $(VCMP) $(VKPATH)\Lib\vulkan-1.lib
+mandelbrot.exe: mandelbrot.c simplebmp.c mandelbrot.spv
+	$(CC) mandelbrot.c simplebmp.c $(VCMP) $(VKPATH)\Lib\vulkan-1.lib
+
+mandelbrot.spv: mandelbrot.comp
+	$(GLSLC) -o $@ mandelbrot.comp
 
 clean:
 	$(RM) $(ALL) $(RESULTS)

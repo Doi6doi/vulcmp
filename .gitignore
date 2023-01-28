@@ -5,3 +5,4 @@ vulcmp.geany
 /test/*.obj
 /*.obj
 /*.dll
+/test/*.exe

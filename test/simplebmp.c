@@ -2,7 +2,17 @@
 
 #include <stdio.h>
 
-typedef struct __attribute__((__packed__)) Bmph_ {
+#define VPACKED 
+
+#ifdef __GNUC__
+   #define VPACKED __attribute__((__packed__))
+#endif
+
+#ifdef _MSC_VER
+   #pragma pack(1)
+#endif
+
+typedef struct VPACKED Bmph_ {
    char magic[2];
    uint32_t size;
    uint32_t reserved;
