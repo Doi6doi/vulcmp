@@ -16,4 +16,4 @@ mandelbrot.spv: mandelbrot.comp
 	$(GLSLC) -o $@ $<
 
 clean:
-	$(RM) $(ALL) $(RESULTS)
+	$(RM) $(ALL) $(RESULTS) *.spv

@@ -18,7 +18,7 @@ typedef struct Vcp__Task * VcpTask;
 #define VCP_NOGROUP -10006
 #define VCP_NOSTORAGE -10007
 
-/// vulkan handle score function 
+/// vulkan handle score function
 typedef int32_t (* VcpScorer )( void * );
 /// default physical device score
 int vcp_physical_score( void * p );

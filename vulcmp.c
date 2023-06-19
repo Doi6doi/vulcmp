@@ -42,7 +42,7 @@ typedef struct Vcp__Task {
 
 typedef struct Vcp__Vulcomp {
    VkInstance instance;
-   VkPhysicalDevice physical;	
+   VkPhysicalDevice physical;
    int32_t family;
    VkDevice device;
    VkQueue queue;
@@ -51,7 +51,7 @@ typedef struct Vcp__Vulcomp {
    VcpStorage * storages;
    uint32_t ntask;
    VcpTask * tasks;
-} Vcp_Vulcomp; 
+} Vcp_Vulcomp;
 
 
 VcpVulcomp vcp_init( VcpStr appName, uint32_t flags ) {
@@ -97,8 +97,8 @@ VcpVulcomp vcp_init( VcpStr appName, uint32_t flags ) {
 
 
 void vcp_select_physical( VcpVulcomp v, VcpScorer s ) {
-   uint32_t nphys; 
-   if (( vcpResult = vkEnumeratePhysicalDevices( 
+   uint32_t nphys;
+   if (( vcpResult = vkEnumeratePhysicalDevices(
       v->instance, & nphys, NULL )))
       return;
    VkPhysicalDevice * phys = VCP_REALLOC( NULL, VkPhysicalDevice, nphys );
@@ -122,7 +122,7 @@ void vcp_select_physical( VcpVulcomp v, VcpScorer s ) {
    if ( ! v->physical )
       vcpResult = VCP_NOPHYSICAL;
    phys = VCP_REALLOC( phys, VkPhysicalDevice, 0 );
-}	
+}
 
 
 void vcp_select_family( VcpVulcomp v, VcpScorer s ) {
@@ -162,10 +162,10 @@ void vcp_check_fail() {
 
 /// free command
 static void vcp_free_command( VcpTask t ) {
-   vkFreeCommandBuffers( t->vulcomp->device, 
+   vkFreeCommandBuffers( t->vulcomp->device,
       t->vulcomp->commands, 1, & t->command );
    t->command = 0;
-}	
+}
 
 /// remove task from list
 static void vcp_task_remove( VcpTask t ) {
@@ -173,11 +173,11 @@ static void vcp_task_remove( VcpTask t ) {
    VcpTask * tt = v->tasks;
    int n = v->ntask;
    for ( int i = n-1; 0 <= i; --i ) {
-	  if (tt[i] == t ) {
-		 tt[i] = tt[n-1];
-		 v->tasks = VCP_REALLOC( tt, VcpTask, n-1 );
-		 return;
-	  }
+      if (tt[i] == t ) {
+	 tt[i] = tt[n-1];
+	 v->tasks = VCP_REALLOC( tt, VcpTask, n-1 );
+	 return;
+      }
    }
 }
 
@@ -223,11 +223,11 @@ static void vcp_storage_remove( VcpStorage s ) {
    VcpStorage * ss = v->storages;
    int n = v->nstorage;
    for ( int i = n-1; 0 <= i; --i ) {
-	  if (ss[i] == s ) {
-		 ss[i] = ss[n-1];
-		 v->storages = VCP_REALLOC( ss, VcpStorage, n-1 );
-		 return;
-	  }
+      if (ss[i] == s ) {
+	 ss[i] = ss[n-1];
+	 v->storages = VCP_REALLOC( ss, VcpStorage, n-1 );
+	 return;
+      }
    }
 }
 
@@ -241,8 +241,8 @@ void vcp_storage_free( VcpStorage s ) {
    if ( s->buffer ) {
 	  vkDestroyBuffer( s->vulcomp->device, s->buffer, NULL );
 	  s->buffer = 0;
-   }  
-   s = VCP_REALLOC( s, Vcp_Storage, 0 );	
+   }
+   s = VCP_REALLOC( s, Vcp_Storage, 0 );
 }
 
 
@@ -441,7 +441,7 @@ VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size ) {
    vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
    VcpStorage ret = VCP_REALLOC( NULL, Vcp_Storage, 1 );
    if ( ! ret ) return NULL;
-   VcpStorage * vstorages = VCP_REALLOC( v->storages, 
+   VcpStorage * vstorages = VCP_REALLOC( v->storages,
       VcpStorage, v->nstorage+1 );
    if ( ! vstorages ) return NULL;
    vstorages[ v->nstorage++ ] = ret;
@@ -660,11 +660,11 @@ static bool vcp_task_prepare( VcpTask t ) {
 	  if ( vcpResult ) return false;
    } 
    return true;
-}	
+}
 
 
 VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
-   VcpStr entry, uint32_t nstorage 
+   VcpStr entry, uint32_t nstorage
 ) {
    vcpResult = VK_ERROR_INVALID_SHADER_NV;
    if ( 0 == size ) return NULL;
@@ -672,7 +672,7 @@ VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
    int es = strlen( entry );
    char * tentry = VCP_REALLOC( NULL, char, es+1 );
    if ( ! tentry ) return NULL;
-   strcpy( tentry, entry ); 
+   strcpy( tentry, entry );
    VcpStorage * tstorages = VCP_REALLOC( NULL, VcpStorage, nstorage );
    if ( ! tstorages ) return NULL;
    memset( tstorages, 0, nstorage * sizeof( VcpStorage ) );
@@ -766,7 +766,7 @@ void vcp_task_start( VcpTask t ) {
 
 
 void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx,
-   uint32_t gy, uint32_t gz ) 
+   uint32_t gy, uint32_t gz )
 {
    for ( int i=0; i < t->nstorage; ++i ) {
 	  if ( ! storages[i] ) {
@@ -788,7 +788,7 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx,
 	  vcpResult = VCP_RUNNING;
       return;
    }
-}   
+}
 
 
 bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec ) {
