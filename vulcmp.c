@@ -7,7 +7,7 @@
 
 #define VCP_DEBUG( ... ) { fprintf(stderr, __VA_ARGS__ ); }
 #define VCP_FAIL( ... ) { VCP_DEBUG( __VA_ARGS__ ); exit(1); }
-#define VCP_REALLOC( p, type, n ) (type *)realloc( p, n*sizeof(type) )
+#define VCP_REALLOC( p, type, n ) (type *)realloc( p, (n)*sizeof(type) )
 
 VkResult vcpResult = VK_SUCCESS;
 
@@ -176,6 +176,7 @@ static void vcp_task_remove( VcpTask t ) {
       if (tt[i] == t ) {
 	 tt[i] = tt[n-1];
 	 v->tasks = VCP_REALLOC( tt, VcpTask, n-1 );
+         -- v->ntask;
 	 return;
       }
    }
@@ -195,15 +196,15 @@ void vcp_task_free( VcpTask t ) {
    if ( t->pipe ) {
 	  vkDestroyPipeline( d, t->pipe, NULL );
 	  t->pipe = 0;
-   } 
+   }
    if ( t->pipelay ) {
 	  vkDestroyPipelineLayout( d, t->pipelay, NULL );
 	  t->pipelay = 0;
-   } 
+   }
    if ( t->descs ) {
 	  vkDestroyDescriptorPool( d, t->descs, NULL );
 	  t->descs = 0;
-   } 
+   }
    if ( t->desclay ) {
 	  vkDestroyDescriptorSetLayout( d, t->desclay, NULL );
 	  t->desclay = 0;
@@ -226,6 +227,7 @@ static void vcp_storage_remove( VcpStorage s ) {
       if (ss[i] == s ) {
 	 ss[i] = ss[n-1];
 	 v->storages = VCP_REALLOC( ss, VcpStorage, n-1 );
+         -- v->nstorage;
 	 return;
       }
    }
@@ -235,32 +237,32 @@ static void vcp_storage_remove( VcpStorage s ) {
 void vcp_storage_free( VcpStorage s ) {
    vcp_storage_remove( s );
    if ( s->memory ) {
-	  vkFreeMemory( s->vulcomp->device, s->memory, NULL );
-	  s->memory = 0;
+      vkFreeMemory( s->vulcomp->device, s->memory, NULL );
+      s->memory = 0;
    }
    if ( s->buffer ) {
-	  vkDestroyBuffer( s->vulcomp->device, s->buffer, NULL );
-	  s->buffer = 0;
+      vkDestroyBuffer( s->vulcomp->device, s->buffer, NULL );
+      s->buffer = 0;
    }
    s = VCP_REALLOC( s, Vcp_Storage, 0 );
 }
 
 
 void vcp_done( VcpVulcomp v ) {
-	for ( int i=v->nstorage-1; 0 <= i; --i )
-	   vcp_storage_free( v->storages[i] );
+    for ( int i=v->nstorage-1; 0 <= i; --i )
+       vcp_storage_free( v->storages[i] );
     for ( int i=v->ntask-1; 0 <= i; --i )
        vcp_task_free( v->tasks[i] );
-	if ( v->commands ) {
-	   vkDestroyCommandPool( v->device, v->commands, NULL );
-	   v->commands = 0;
-	}
+    if ( v->commands ) {
+       vkDestroyCommandPool( v->device, v->commands, NULL );
+       v->commands = 0;
+    }
     if ( v->device ) {
-	   vkDestroyDevice( v->device, NULL );
-	   v->device = 0;
-	}
-	vkDestroyInstance( v->instance, NULL );
-	v = VCP_REALLOC( v, Vcp_Vulcomp, 0 );
+       vkDestroyDevice( v->device, NULL );
+       v->device = 0;
+    }
+    vkDestroyInstance( v->instance, NULL );
+    v = VCP_REALLOC( v, Vcp_Vulcomp, 0 );
 }
 
 
@@ -324,24 +326,28 @@ static void vcp_create_queue( VcpVulcomp v ) {
 
 /// create descriptor layout
 static void vcp_create_desclay( VcpTask t ) {
-   VkDescriptorSetLayoutBinding dlb = {
-	  .binding = 0,
-	  .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-	  .descriptorCount = t->nstorage,
-	  .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
-	  .pImmutableSamplers = NULL
-   };	
+   VkDescriptorSetLayoutBinding dlbs[ t->nstorage ];
+   for ( int i=0; i < t->nstorage; ++i ) {
+      VkDescriptorSetLayoutBinding dlb = {
+         .binding = i,
+       	 .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+         .descriptorCount = 1,
+         .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
+	 .pImmutableSamplers = NULL
+      };
+      dlbs[i] = dlb;
+   }
    VkDescriptorSetLayoutCreateInfo dli = {
       .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
       .pNext = NULL,
       .flags = 0,
-      .bindingCount = 1,
-      .pBindings = & dlb
+      .bindingCount = t->nstorage,
+      .pBindings = dlbs
    };
    vcpResult = vkCreateDescriptorSetLayout( t->vulcomp->device,
       & dli, NULL, & t->desclay );
 }
-      	
+
 
 /// create pipeline layout
 static void vcp_create_pipelay( VcpTask t ) {
@@ -357,7 +363,7 @@ static void vcp_create_pipelay( VcpTask t ) {
    vcpResult = vkCreatePipelineLayout( t->vulcomp->device, &pli, NULL,
       & t->pipelay );
 }
-      	
+
 
 /// create pipeline
 static void vcp_create_pipe( VcpTask t ) {
@@ -392,7 +398,7 @@ static void vcp_create_commands( VcpVulcomp v ) {
 	  .queueFamilyIndex = v->family
    };
    vcpResult = vkCreateCommandPool( v->device, &pci, NULL, & v->commands );
-}	
+}
 
 
 static bool vcp_prepare( VcpVulcomp v ) {
@@ -502,8 +508,8 @@ static void vcp_create_fence( VcpTask t ) {
 /// create descriptor pool
 static void vcp_create_descs( VcpTask t ) {
    VkDescriptorPoolSize dps = {
-	  .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-	  .descriptorCount = 1
+      .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+      .descriptorCount = t->nstorage
    };
    VkDescriptorPoolCreateInfo dpi = {
 	  .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
@@ -519,39 +525,39 @@ static void vcp_create_descs( VcpTask t ) {
 
 
 /// create and fill descriptor set
-static void vcp_create_desc( VcpTask t ) { 
+static void vcp_create_desc( VcpTask t ) {
    VkDescriptorSetAllocateInfo dai = {
-	  .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-	  .pNext = NULL,
-	  .descriptorPool = t->descs,
-	  .descriptorSetCount = 1,
-	  .pSetLayouts = & t->desclay
+     .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+     .pNext = NULL,
+     .descriptorPool = t->descs,
+     .descriptorSetCount = 1,
+     .pSetLayouts = & t->desclay
    };
    if (( vcpResult = vkAllocateDescriptorSets( t->vulcomp->device, & dai,
       & t->desc )))
       return;
    VkDescriptorBufferInfo dbi = {
-	  .offset = 0,
-	  .range = VK_WHOLE_SIZE 
+      .offset = 0,
+      .range = VK_WHOLE_SIZE
    };
    VkWriteDescriptorSet wd = {
-	  .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-	  .pNext = NULL,
-	  .dstSet = t->desc,
-	  .dstBinding = 0,
-	  .descriptorCount = 1,
-	  .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-	  .pImageInfo = NULL,
-	  .pBufferInfo = & dbi,
-	  .pTexelBufferView = NULL
+      .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+      .pNext = NULL,
+      .dstSet = t->desc,
+      .dstArrayElement = 0,
+      .descriptorCount = 1,
+      .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+      .pImageInfo = NULL,
+      .pBufferInfo = & dbi,
+      .pTexelBufferView = NULL
    };
    int n = t->nstorage;
    for ( int i=0; i<n; ++i ) {
-	  dbi.buffer = t->storages[i]->buffer;
-	  wd.dstArrayElement = i;
+      wd.dstBinding = i,
+      dbi.buffer = t->storages[i]->buffer;
       vkUpdateDescriptorSets( t->vulcomp->device, 1, &wd, 0, NULL );
-   } 
-}   
+   }
+}
 
 
 /// build command
@@ -610,7 +616,7 @@ static void vcp_storage_turn( VcpStorage s, bool todev ) {
    }
    if ( ! vcpResult )
       s->todev = todev;
-}    
+}
 
 
 /// get storage memory address
@@ -625,12 +631,12 @@ void * vcp_storage_address( VcpStorage s ) {
 }
 
 
-/// prepare task for 
+/// prepare task for
 static bool vcp_task_prepare( VcpTask t ) {
    if ( ! t->fence ) {
 	  vcp_create_fence( t );
-	  if ( vcpResult ) return false;	
-   }	
+	  if ( vcpResult ) return false;
+   }
    if ( ! t->desclay ) {
 	  vcp_create_desclay( t );
 	  if ( vcpResult ) return false;
@@ -642,7 +648,7 @@ static bool vcp_task_prepare( VcpTask t ) {
    if ( ! t->desc ) {
 	  vcp_create_desc( t );
 	  if ( vcpResult ) return false;
-   } 
+   }
    if ( ! t->pipelay ) {
 	  vcp_create_pipelay( t );
 	  if ( vcpResult ) return false;
@@ -742,7 +748,7 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename,
       ret = vcp_task_create( v, data, size, entry, nstorage );
    if ( data )
       data = VCP_REALLOC( data, char, 0 );
-   return ret;	  
+   return ret;
 }
 
 
