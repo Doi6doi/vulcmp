@@ -569,14 +569,14 @@ static bool vcp_build_command( VcpTask t ) {
 	  .pInheritanceInfo = NULL
    };
    VkPipelineBindPoint cmp = VK_PIPELINE_BIND_POINT_COMPUTE;
-   if (( vcpResult = vkBeginCommandBuffer( t->command, &bbi ))) 
+   if (( vcpResult = vkBeginCommandBuffer( t->command, &bbi )))
       return false;
    vkCmdBindPipeline( t->command, cmp, t->pipe );
-   vkCmdBindDescriptorSets( t->command, cmp, 
+   vkCmdBindDescriptorSets( t->command, cmp,
       t->pipelay, 0, 1, & t->desc, 0, NULL );
    vkCmdDispatch( t->command, t->gx, t->gy, t->gz );
    if (( vcpResult = vkEndCommandBuffer( t->command )))
-      return false;  
+      return false;
    return true;
 }
 
@@ -664,7 +664,7 @@ static bool vcp_task_prepare( VcpTask t ) {
    for ( int i=0; i < t->nstorage; ++i ) {
 	  vcp_storage_turn( t->storages[i], true );
 	  if ( vcpResult ) return false;
-   } 
+   }
    return true;
 }
 
@@ -755,6 +755,9 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename,
 void vcp_task_start( VcpTask t ) {
    if ( ! vcp_task_prepare( t ))
       return;
+   if (( vcpResult = vkResetFences( t->vulcomp->device,
+      1, &t->fence )))
+      return;
    VkSubmitInfo si = {
 	  .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 	  .pNext = NULL,
@@ -781,7 +784,7 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx,
 	  }
 	  t->storages[i] = storages[i];
    }
-   if ( 0 == gx * gy * gy ) {
+   if ( 0 == gx * gy * gz ) {
 	  vcpResult = VCP_NOGROUP;
 	  return;
    }
@@ -800,13 +803,13 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx,
 bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec ) {
    if ( ! t->vulcomp->device || ! t->fence )
       return true;
-   if ( ! t->running ) 
-      return true;   
+   if ( ! t->running )
+      return true;
    vcpResult = vkWaitForFences( t->vulcomp->device, 1, & t->fence, true,
       1000*timeoutMsec );
    t->running = VK_TIMEOUT == vcpResult;
    return ! t->running;
-}   
+}
 
 
 
