@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 typedef const char * VcpStr;
-typedef enum { VCP_VALIDATION=1 } VcpFlags;
+typedef enum { VCP_VALIDATION=1, VCP_ATOMIC_FLOAT=2 } VcpFlags;
 typedef struct Vcp__Vulcomp * VcpVulcomp;
 typedef struct Vcp__Storage * VcpStorage;
 typedef struct Vcp__Task * VcpTask;

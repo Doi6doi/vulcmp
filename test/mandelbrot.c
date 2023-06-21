@@ -19,12 +19,12 @@ void debug(const char * s) {
 int main() {
    int w = 3200;
    int h = 2400;
-   int gw = 16, gh = 16;
-   VcpVulcomp v = vcp_init( "vcptest", VCP_VALIDATION );
+   int grp = 16;
+   VcpVulcomp v = vcp_init( "vcptest", VCP_VALIDATION | VCP_ATOMIC_FLOAT );
 //   VcpVulcomp v = vcp_init( "vcptest", 0 );
    VcpStorage s = vcp_storage_create( v, w*h*4*sizeof(float) );
    VcpTask t = vcp_task_create_file( v, "mandelbrot.spv", "main", 1 );
-   vcp_task_setup( t, &s, w/gw, h/gh, 1 );
+   vcp_task_setup( t, &s, w/grp, h/grp, 1 );
    vcp_task_start( t );
    vcp_check_fail();
    while ( ! vcp_task_wait( t, 1000 ) )

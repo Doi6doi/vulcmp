@@ -9,6 +9,9 @@
 #define VCP_FAIL( ... ) { VCP_DEBUG( __VA_ARGS__ ); exit(1); }
 #define VCP_REALLOC( p, type, n ) (type *)realloc( p, (n)*sizeof(type) )
 
+// maximum number of possible (device or instance) exceptions
+#define VCP_MAXEXT 5
+
 VkResult vcpResult = VK_SUCCESS;
 
 typedef struct Vcp__Storage {
@@ -47,6 +50,10 @@ typedef struct Vcp__Vulcomp {
    VkDevice device;
    VkQueue queue;
    VkCommandPool commands;
+   uint32_t niext;
+   VcpStr iexts[VCP_MAXEXT];
+   uint32_t ndext;
+   VcpStr dexts[VCP_MAXEXT];
    uint32_t nstorage;
    VcpStorage * storages;
    uint32_t ntask;
@@ -68,6 +75,8 @@ VcpVulcomp vcp_init( VcpStr appName, uint32_t flags ) {
    ret->ntask = 0;
    ret->tasks = NULL;
    ret->commands = 0;
+   ret->niext = 0;
+   ret->ndext = 0;
    VkApplicationInfo ai = {
 	  .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
 	  .pNext = NULL,
@@ -81,20 +90,49 @@ VcpVulcomp vcp_init( VcpStr appName, uint32_t flags ) {
    int nlayers = 0;
    if ( flags & VCP_VALIDATION )
       layers[nlayers++] = "VK_LAYER_KHRONOS_validation";
+   if ( flags & VCP_ATOMIC_FLOAT ) {
+      ret->iexts[ret->niext++] = "VK_KHR_get_physical_device_properties2";
+      ret->dexts[ret->ndext++] = "VK_EXT_shader_atomic_float";
+   }
    VkInstanceCreateInfo ici = {
-	  .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-	  .pNext = NULL,
-	  .flags = 0,
-	  .pApplicationInfo = &ai,
-	  .enabledLayerCount = nlayers,
-	  .ppEnabledLayerNames = layers,
-	  .enabledExtensionCount = 0,
-	  .ppEnabledExtensionNames = NULL
+      .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+      .pNext = NULL,
+      .flags = 0,
+      .pApplicationInfo = &ai,
+      .enabledLayerCount = nlayers,
+      .ppEnabledLayerNames = layers,
+      .enabledExtensionCount = ret->niext,
+      .ppEnabledExtensionNames = ret->iexts
    };
    vcpResult = vkCreateInstance( &ici, NULL, &(ret->instance) );
    return ret;
 }
 
+/// is extension in list
+bool vcp_has_extension( VkExtensionProperties * es, int n, VcpStr s ) {
+   for ( int i=0; i<n; ++i ) {
+      if ( 0 == strncmp( s, es[i].extensionName, VK_MAX_EXTENSION_NAME_SIZE ))
+         return true;
+   }
+   return false;
+}
+
+/// does physical device have all needed extensions
+bool vcp_has_extensions( VcpVulcomp v, VkPhysicalDevice p ) {
+   if ( ! v->ndext ) return true;
+   uint32_t n;
+   if (( vcpResult = vkEnumerateDeviceExtensionProperties( p, NULL, &n, NULL )))
+      return false;
+   VkExtensionProperties * e = VCP_REALLOC( NULL, VkExtensionProperties, n );
+   if ( !e ) return false;
+   bool ok = true;
+   for ( int i=0; ok && i< v->ndext; ++i ) {
+      if ( ! vcp_has_extension( e, n, v->dexts[i] ))
+         ok = false;
+   }
+   e = VCP_REALLOC( e, VkExtensionProperties, 0 );
+   return ok;
+}
 
 void vcp_select_physical( VcpVulcomp v, VcpScorer s ) {
    uint32_t nphys;
@@ -106,17 +144,19 @@ void vcp_select_physical( VcpVulcomp v, VcpScorer s ) {
       vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
 	  return;
    }
-   if (( vcpResult = vkEnumeratePhysicalDevices( 
+   if (( vcpResult = vkEnumeratePhysicalDevices(
       v->instance, & nphys, phys )))
       return;
    int best = -1;
    v->physical = 0;
    for ( int i=0; i < nphys; ++i) {
-	  int si = (*s)( phys+i );
-	  if ( si > best ) {
-         vcpResult = VK_SUCCESS;
-		 v->physical = phys[i];
-		 best = si;
+      if ( vcp_has_extensions( v, phys[i] )) {
+         int si = (*s)( phys+i );
+         if ( si > best ) {
+            vcpResult = VK_SUCCESS;
+            v->physical = phys[i];
+            best = si;
+         }
       }
    }
    if ( ! v->physical )
@@ -166,6 +206,7 @@ static void vcp_free_command( VcpTask t ) {
       t->vulcomp->commands, 1, & t->command );
    t->command = 0;
 }
+
 
 /// remove task from list
 static void vcp_task_remove( VcpTask t ) {
@@ -274,7 +315,7 @@ static int vcp_phyiscal_type_score( VkPhysicalDeviceType pdt ) {
 	  case VK_PHYSICAL_DEVICE_TYPE_CPU: return 2;
 	  default: return 0;
    }
-} 
+}
 
 int vcp_physical_score( void * p ) {
    VkPhysicalDevice pd = *(VkPhysicalDevice *)p;
@@ -300,20 +341,20 @@ static void vcp_create_device( VcpVulcomp v ) {
 	  .queueFamilyIndex = v->family,
 	  .queueCount = 1,
 	  .pQueuePriorities = &priority
-   };	
+   };
    VkDeviceCreateInfo dci = {
 	  .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 	  .pNext = NULL,
 	  .flags = 0,
-	  .queueCreateInfoCount = 1,	
+	  .queueCreateInfoCount = 1,
 	  .pQueueCreateInfos = &qci,
 	  .enabledLayerCount = 0,
 	  .ppEnabledLayerNames = NULL,
-	  .enabledExtensionCount = 0,
-	  .ppEnabledExtensionNames = NULL,
+	  .enabledExtensionCount = v->ndext,
+	  .ppEnabledExtensionNames = v->dexts,
 	  .pEnabledFeatures = NULL
    };
-   if (( vcpResult = vkCreateDevice( 
+   if (( vcpResult = vkCreateDevice(
       v->physical, &dci, NULL, &v->device )))
       return;
 }
