@@ -1,6 +1,6 @@
 include Makefile.defs
 
-CC=gcc
+CC=gcc -g
 RM=rm -f
 EH=@echo
 
