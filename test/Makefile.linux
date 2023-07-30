@@ -1,4 +1,4 @@
-ALL=atom mandelbrot
+ALL=mandelbrot
 VCPDIR=..
 SO=$(VCPDIR)/libvulcmp.so
 GLSLC=glslc

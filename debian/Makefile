@@ -6,7 +6,7 @@ CP=cp
 RM=rm -rf
 EH=echo
 
-DDIR=$(NAME)_$(VER)_$(ARCH)
+DDIR=$(NAME)_$(VER)_$(LARCH)
 DEB=$(DDIR).deb
 CNT=$(DDIR)/DEBIAN/control
 
@@ -24,7 +24,7 @@ $(CNT): Makefile
 	$(MD) $(DDIR)/DEBIAN/
 	$(EH) 'Package: $(NAME)' > $(CNT)
 	$(EH) 'Version: $(VER)' >> $(CNT)
-	$(EH) 'Architecture: $(ARCH)' >> $(CNT)
+	$(EH) 'Architecture: $(LARCH)' >> $(CNT)
 	$(EH) 'Maintainer: $(MNAME) <$(MEMAIL)>' >> $(CNT)
 	$(EH) 'Depends: libvulkan1' >> $(CNT)
 	$(EH) 'Description: $(DESC)' >> $(CNT)

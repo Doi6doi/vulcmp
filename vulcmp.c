@@ -38,7 +38,6 @@ typedef struct Vcp__Task {
    bool running;
    uint32_t npart;
    VcpPart * parts;
-   uint32_t nrepeat;
    VcpStr entry;
    uint32_t nstorage;
    VcpStorage * storages;
@@ -197,12 +196,12 @@ void vcp_select_family( VcpVulcomp v, VcpScorer s ) {
       }
    }
    if ( 0 > v->family )
-	  vcpResult = VCP_NOFAMILY;
+      vcpResult = VCP_NOFAMILY;
    qfams = VCP_REALLOC( qfams, VkQueueFamilyProperties, 0 );
 }
 
 int vcp_error() {
-	return (int)vcpResult;
+   return (int)vcpResult;
 }
 
 void vcp_check_fail() {
@@ -419,17 +418,17 @@ static void vcp_create_pipelay( VcpTask t ) {
 /// create pipeline
 static void vcp_create_pipe( VcpTask t ) {
    VkComputePipelineCreateInfo pci = {
-	  .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-	  .pNext = NULL,
-	  .flags = 0,
-	  .stage = {
-		 .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-		 .pNext = NULL,
-		 .flags = 0,
-		 .stage = VK_SHADER_STAGE_COMPUTE_BIT,
-		 .module = t->shader,
-		 .pName = t->entry,
-		 .pSpecializationInfo = NULL
+      .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+      .pNext = NULL,
+      .flags = 0,
+      .stage = {
+         .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+	 .pNext = NULL,
+	 .flags = 0,
+	 .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+	 .module = t->shader,
+	 .pName = t->entry,
+	 .pSpecializationInfo = NULL
       },
       .layout = t->pipelay,
       .basePipelineHandle = 0,
@@ -630,20 +629,16 @@ static bool vcp_build_command( VcpTask t ) {
    vkCmdBindPipeline( t->command, cmp, t->pipe );
    vkCmdBindDescriptorSets( t->command, cmp,
       t->pipelay, 0, 1, & t->desc, 0, NULL );
-   VcpPart * p = t->parts;
    VkPipelineStageFlags psf = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-   for ( int i=0; i < t->nrepeat; ++i) {
-      for ( int j=0; j < t->npart; ++j ) {
-         VcpPart * p = t->parts+j;
-         if ( 0 < i || 0 < j ) {
-            vkCmdPipelineBarrier( t->command, psf, psf,
-               0, 1, & t->vulcomp->barrier, 0, NULL, 0, NULL );
-         }
-         vkCmdDispatchBase( t->command, p->baseX, p->baseY, p->baseZ,
-            p->countX, p->countY, p->countZ );
+   for ( int j=0; j < t->npart; ++j ) {
+      VcpPart * p = t->parts+j;
+      if ( 0 < j ) {
+         vkCmdPipelineBarrier( t->command, psf, psf,
+            0, 1, & t->vulcomp->barrier, 0, NULL, 0, NULL );
       }
+      vkCmdDispatchBase( t->command, p->baseX, p->baseY, p->baseZ,
+         p->countX, p->countY, p->countZ );
    }
-//   vkCmdDispatchBase( t->command, 0,0,0, p->countX, p->countY, p->countZ );
    if (( vcpResult = vkEndCommandBuffer( t->command )))
       return false;
    return true;
@@ -768,12 +763,10 @@ VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
    ret->desc = 0;
    ret->npart = 0;
    ret->parts = NULL;
-   ret->nrepeat = 0;
    ret->running = 0;
    ret->entry = tentry;
    ret->nstorage = nstorage;
    ret->storages = tstorages;
-   ret->nrepeat = 1;
    if ( ! vcp_prepare(v) ) return ret;
    VkShaderModuleCreateInfo sci = {
 	  .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -863,7 +856,6 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx,
    vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
    VcpPart * ps = VCP_REALLOC( t->parts, VcpPart, 1 );
    if ( ! ps ) return;
-   t->nrepeat = 1;
    t->npart = 1;
    t->parts = ps;
    ps->baseX = 0;
@@ -872,16 +864,16 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx,
    ps->countX = gx;
    ps->countY = gy;
    ps->countZ = gz;
+   vcpResult = VCP_SUCCESS;
 }
 
-void vcp_task_parts( VcpTask t, uint32_t npart, VcpPart * parts, uint32_t nrepeat ) {
+void vcp_task_parts( VcpTask t, uint32_t npart, VcpPart * parts ) {
    vcpResult = VCP_NOGROUP;
-   if ( 0 == npart || 0 == nrepeat ) return;
+   if ( 0 == npart ) return;
    vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
    VcpPart * ps = VCP_REALLOC( t->parts, VcpPart, npart );
    if ( ! ps ) return;
    t->npart = npart;
-   t->nrepeat = nrepeat;
    t->parts = ps;
    for ( int i=0; i<npart; ++i)
       ps[i] = parts[i];
