@@ -32,7 +32,6 @@ GPU initialization.
 - `appName`: name of your application
 - `flags`: bitmask of [VcpFlags](#initialization-flags)
 - *returns* handle to GPU processing
-
 ---
 ```c
 void vcp_done()
@@ -99,6 +98,9 @@ Wait for task to terminate.
 
 - `VcpStr`: shorthand for const char *
 - `VcpFlag`: [initialization flag](#initialization-flags)
+- `VcpPart`: struct used to run task for given parts of space
+    - `baseX`,`baseY`,`baseZ`: coorindates of starting group
+    - `countX`,`countY`,`countZ`: sizes of area to run task on
 - `VcpScorer`: function which returns a score for an object to help vulcmp select the best. 
  Larger value is better, less than zero value means object is not suitable, so it wont be selected
 
@@ -109,6 +111,14 @@ void vcp_check_fail()
 ```
 Checks last error code (*vcp_error*) and terminates program with an error message if it was not *VCP_SUCCESS* or *VCP_TIMEOUT*.
 
+---
+```c
+void vcp_task_parts( VcpTask t, uint32_t nparts, VcpPart * parts );
+```
+Setup task to run in parts. Parts will run after each other, with memory barrier between them.
+- `t`: task handle
+- `nparts`: number of parts to run (count of `parts` array)
+- `parts`: the parts to run in given order
 ---
 ```c
 VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry, uint32_t nstorage )
@@ -171,6 +181,7 @@ Frees up resources used by `t`. You usually don't need to call this as vulcomp f
 The following flags can be used in *vcp_init*
 
 - `VCP_VALIDATION`: program will use [Vulkan validation layer](https://vulkan-tutorial.com/Drawing_a_triangle/Setup/Validation_layers) and show validation errors.
+- `VCP_ATOMIC_FLOAT`: request support for atomic float operations
 
 ## Error codes
 
