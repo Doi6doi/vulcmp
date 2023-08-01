@@ -17,8 +17,8 @@ It is a wrapper around the Vulkan library but it is much easier to learn and use
 - `VcpStorage`: opaque type handle for GPU accessible memory
 - `VcpTask`: opaque type handle for GPU task (program)
 - `VcpPart`: struct used to run task for given parts of space
-    `baseX`,`baseY`,`baseZ`: coorindates of starting group
-    `countX`,`countY`,`countZ`: sizes of area to run task on
+    - `baseX`,`baseY`,`baseZ`: coorindates of starting group
+    - `countX`,`countY`,`countZ`: sizes of area to run task on
 
 ## Important functions
 
