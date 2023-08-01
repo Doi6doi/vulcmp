@@ -111,6 +111,14 @@ Checks last error code (*vcp_error*) and terminates program with an error messag
 
 ---
 ```c
+void vcp_task_parts( VcpTask t, uint32_t nparts, VcpPart * parts );
+```
+Setup task to run in parts. Parts will run after each other, with memory barrier between them.
+- `t`: task handle
+- `nparts`: number of parts to run (count of `parts` array)
+- `parts`: the parts to run in given order
+---
+```c
 VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry, uint32_t nstorage )
 ```
 Create task directly from a file. Calls *vcp_task_create* after reading whole file to memory.
