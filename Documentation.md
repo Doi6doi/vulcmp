@@ -16,6 +16,9 @@ It is a wrapper around the Vulkan library but it is much easier to learn and use
 - `VcpVulcomp`: opaque type handle for GPU access
 - `VcpStorage`: opaque type handle for GPU accessible memory
 - `VcpTask`: opaque type handle for GPU task (program)
+- `VcpPart`: struct used to run task for given parts of space
+    `baseX`,`baseY`,`baseZ`: coorindates of starting group
+    `countX`,`countY`,`countZ`: sizes of area to run task on
 
 ## Important functions
 
@@ -32,7 +35,6 @@ GPU initialization.
 - `appName`: name of your application
 - `flags`: bitmask of [VcpFlags](#initialization-flags)
 - *returns* handle to GPU processing
-
 ---
 ```c
 void vcp_done()
