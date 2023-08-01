@@ -32,6 +32,7 @@ GPU initialization.
 - `appName`: name of your application
 - `flags`: bitmask of [VcpFlags](#initialization-flags)
 - *returns* handle to GPU processing
+
 ---
 ```c
 void vcp_done()
@@ -119,6 +120,7 @@ Setup task to run in parts. Parts will run after each other, with memory barrier
 - `t`: task handle
 - `nparts`: number of parts to run (count of `parts` array)
 - `parts`: the parts to run in given order
+
 ---
 ```c
 VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry, uint32_t nstorage )
