@@ -6,11 +6,12 @@ CP=cp
 RM=rm -rf
 EH=echo
 
-DDIR=$(NAME)_$(VER)_$(ARCH)
+LNAME=lib$(NAME)
+DDIR=$(LNAME)_$(VER)_$(LARCH)
 DEB=$(DDIR).deb
 CNT=$(DDIR)/DEBIAN/control
 
-build: ../lib$(NAME).so ../vulcmp.h $(CNT)
+build: ../$(LNAME).so ../vulcmp.h $(CNT)
 	$(MD) $(DDIR)/usr/lib
 	$(CP) ../libvulcmp.so $(DDIR)/usr/lib/
 	$(MD) $(DDIR)/usr/include
@@ -22,9 +23,9 @@ clean:
 
 $(CNT): Makefile
 	$(MD) $(DDIR)/DEBIAN/
-	$(EH) 'Package: $(NAME)' > $(CNT)
+	$(EH) 'Package: $(LNAME)' > $(CNT)
 	$(EH) 'Version: $(VER)' >> $(CNT)
-	$(EH) 'Architecture: $(ARCH)' >> $(CNT)
+	$(EH) 'Architecture: $(LARCH)' >> $(CNT)
 	$(EH) 'Maintainer: $(MNAME) <$(MEMAIL)>' >> $(CNT)
 	$(EH) 'Depends: libvulkan1' >> $(CNT)
 	$(EH) 'Description: $(DESC)' >> $(CNT)

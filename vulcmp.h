@@ -10,6 +10,12 @@ typedef struct Vcp__Vulcomp * VcpVulcomp;
 typedef struct Vcp__Storage * VcpStorage;
 typedef struct Vcp__Task * VcpTask;
 
+typedef struct Vcp_Part {
+   uint32_t baseX, baseY, baseZ, countX, countY, countZ;
+} VcpPart;
+
+#define VCP_SUCCESS 0
+#define VCP_TIMEOUT 2
 #define VCP_NOPHYSICAL -10001
 #define VCP_NOFAMILY -10002
 #define VCP_NOMEMORY -10003
@@ -50,8 +56,10 @@ VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, VcpStr entry,
 VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry,
    uint32_t nstorage );
 /// setup task
-void vcp_task_setup( VcpTask t, VcpStorage * storages, 
+void vcp_task_setup( VcpTask t, VcpStorage * storages,
    uint32_t gx, uint32_t gy, uint32_t gz );
+/// setup task repeat
+void vcp_task_parts( VcpTask t, uint32_t nparts, VcpPart * parts );
 /// start task
 void vcp_task_start( VcpTask t );
 /// wait task to finish

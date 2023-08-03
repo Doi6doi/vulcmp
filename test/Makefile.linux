@@ -3,6 +3,7 @@ VCPDIR=..
 SO=$(VCPDIR)/libvulcmp.so
 GLSLC=glslc
 RESULTS=mandelbrot.bmp mandelbrot.spv
+CC=gcc -g -I$(VCPDIR) -L$(VCPDIR)
 
 all: $(SO) $(ALL:=.run)
 
@@ -10,9 +11,15 @@ all: $(SO) $(ALL:=.run)
 	LD_LIBRARY_PATH=$(VCPDIR) ./$<
 
 mandelbrot: mandelbrot.c simplebmp.c mandelbrot.spv
-	$(CC) -o $@ mandelbrot.c simplebmp.c -I$(VCPDIR) -L$(VCPDIR) -lvulcmp
+	$(CC) -o $@ mandelbrot.c simplebmp.c -lvulcmp
 
-mandelbrot.spv: mandelbrot.comp
+atom: atom.c atom.spv
+	$(CC) -o $@ $< -lvulcmp
+
+chain: chain.c chain.spv
+	$(CC) -o $@ $< -lvulcmp
+
+%.spv: %.comp
 	$(GLSLC) -o $@ $<
 
 clean:
