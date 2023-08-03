@@ -364,10 +364,12 @@ static void vcp_create_queue( VcpVulcomp v ) {
    vkGetDeviceQueue( v->device, v->family, 0, &v->queue );
 }
 
-
 /// create descriptor layout
 static void vcp_create_desclay( VcpTask t ) {
-   VkDescriptorSetLayoutBinding dlbs[ t->nstorage ];
+   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
+   VkDescriptorSetLayoutBinding * dlbs = VCP_REALLOC( NULL, VkDescriptorSetLayoutBinding, t->nstorage );
+   if ( ! dlbs )
+	  return;
    for ( int i=0; i < t->nstorage; ++i ) {
       VkDescriptorSetLayoutBinding dlb = {
          .binding = i,
@@ -387,6 +389,8 @@ static void vcp_create_desclay( VcpTask t ) {
    };
    vcpResult = vkCreateDescriptorSetLayout( t->vulcomp->device,
       & dli, NULL, & t->desclay );
+   VCP_REALLOC( dlbs, VkDescriptorSetLayoutBinding, 0 );
+   vcpResult = VK_SUCCESS;
 }
 
 
@@ -615,7 +619,8 @@ static bool vcp_build_command( VcpTask t ) {
    vkCmdBindPipeline( t->command, cmp, t->pipe );
    vkCmdBindDescriptorSets( t->command, cmp,
       t->pipelay, 0, 1, & t->desc, 0, NULL );
-   vkCmdDispatch( t->command, t->gx, t->gy, t->gz );
+   // vkCmdDispatch( t->command, t->gx, t->gy, t->gz );
+   vkCmdDispatchBase( t->command, 0, 0, 0, t->gx, t->gy, t->gz );
    if (( vcpResult = vkEndCommandBuffer( t->command )))
       return false;
    return true;
