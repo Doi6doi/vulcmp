@@ -32,7 +32,7 @@ help:
 	$(EH) test: run tests
 	$(EH):
 
-{$S}.c{$O}.obj:
+.c.obj:
 	$(CC) -c $O $<
 
 $(VLIB): vulcmp.obj

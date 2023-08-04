@@ -374,10 +374,12 @@ static void vcp_create_queue( VcpVulcomp v ) {
    vkGetDeviceQueue( v->device, v->family, 0, &v->queue );
 }
 
-
 /// create descriptor layout
 static void vcp_create_desclay( VcpTask t ) {
-   VkDescriptorSetLayoutBinding dlbs[ t->nstorage ];
+   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
+   VkDescriptorSetLayoutBinding * dlbs = VCP_REALLOC( NULL, VkDescriptorSetLayoutBinding, t->nstorage );
+   if ( ! dlbs )
+	  return;
    for ( int i=0; i < t->nstorage; ++i ) {
       VkDescriptorSetLayoutBinding dlb = {
          .binding = i,
@@ -397,6 +399,8 @@ static void vcp_create_desclay( VcpTask t ) {
    };
    vcpResult = vkCreateDescriptorSetLayout( t->vulcomp->device,
       & dli, NULL, & t->desclay );
+   VCP_REALLOC( dlbs, VkDescriptorSetLayoutBinding, 0 );
+   vcpResult = VK_SUCCESS;
 }
 
 
@@ -426,7 +430,7 @@ static void vcp_create_pipe( VcpTask t ) {
    VkComputePipelineCreateInfo pci = {
       .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
       .pNext = NULL,
-      .flags = 0,
+      .flags = VK_PIPELINE_CREATE_DISPATCH_BASE,
       .stage = {
          .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
 	 .pNext = NULL,
