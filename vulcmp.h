@@ -54,13 +54,13 @@ void * vcp_storage_address( VcpStorage s );
 void vcp_storage_free( VcpStorage s );
 /// create task
 VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, VcpStr entry,
-   uint32_t nstorage );
+   uint32_t nstorage, uint32_t constsize );
 /// create task by file
 VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry,
-   uint32_t nstorage );
+   uint32_t nstorage, uint32_t constsize );
 /// setup task
 void vcp_task_setup( VcpTask t, VcpStorage * storages,
-   uint32_t constsize, uint32_t gx, uint32_t gy, uint32_t gz );
+   uint32_t gx, uint32_t gy, uint32_t gz, void * constants );
 /// setup task repeat
 VcpPart * vcp_task_parts( VcpTask t, uint32_t nparts );
 /// start task

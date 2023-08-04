@@ -58,7 +58,7 @@ Memory address of allocated memory. It can be read or written through this point
 
 ---
 ```c
-VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size, VcpStr entry, uint32_t nstorage )
+VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size, VcpStr entry, uint32_t nstorage, uint32_t constsize )
 ```
 Create a new GPU task.
 - `v`: GPU handle
@@ -66,11 +66,12 @@ Create a new GPU task.
 - `size`: size of [SPIR-V](https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html) module in bytes
 - `entry`: entry point (function name) of task in the [SPIR-V](https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html) code
 - `nstorage`: number of storage buffers accessed by the task
+- `constsize`: push constants size in bytes
 - *returns* handle to task
 
 ---
 ```c
-void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx, uint32_t gy, uint32_t gz )
+void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx, uint32_t gy, uint32_t gz, void * constants )
 ```
 Sets up task before starting. You need to determine the exact memory storages and group sizes before running the task.
 - `t`: task handle
@@ -78,6 +79,7 @@ Sets up task before starting. You need to determine the exact memory storages an
 - `gx`: group size in X dimension
 - `gy`: group size in Y dimension
 - `gz`: group size in Z dimension
+- `constants`: push constant values for execution
 
 ---
 ```c

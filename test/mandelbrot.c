@@ -23,8 +23,8 @@ int main() {
 //   VcpVulcomp v = vcp_init( "vcptest", VCP_VALIDATION );
    VcpVulcomp v = vcp_init( "vcptest", 0 );
    VcpStorage s = vcp_storage_create( v, w*h*4*sizeof(float) );
-   VcpTask t = vcp_task_create_file( v, "mandelbrot.spv", "main", 1 );
-   vcp_task_setup( t, &s, 0, w/grp, h/grp, 1 );
+   VcpTask t = vcp_task_create_file( v, "mandelbrot.spv", "main", 1, 0 );
+   vcp_task_setup( t, &s, w/grp, h/grp, 1, NULL );
    vcp_task_start( t );
    vcp_check_fail();
    while ( ! vcp_task_wait( t, 1000 ) )

@@ -399,7 +399,7 @@ static void vcp_create_desclay( VcpTask t ) {
    };
    vcpResult = vkCreateDescriptorSetLayout( t->vulcomp->device,
       & dli, NULL, & t->desclay );
-   VCP_REALLOC( dlbs, VkDescriptorSetLayoutBinding, 0 );
+   dlbs = VCP_REALLOC( dlbs, VkDescriptorSetLayoutBinding, 0 );
    vcpResult = VK_SUCCESS;
 }
 
@@ -645,10 +645,10 @@ static bool vcp_build_command( VcpTask t ) {
       if ( 0 < j ) {
          vkCmdPipelineBarrier( t->command, psf, psf,
             0, 1, & t->vulcomp->barrier, 0, NULL, 0, NULL );
-         if ( p->constants ) {
-            vkCmdPushConstants( t->command, t->pipelay, VK_SHADER_STAGE_COMPUTE_BIT,
-               0, t->constsize, p->constants );
-         }
+      }
+      if ( p->constants ) {
+         vkCmdPushConstants( t->command, t->pipelay, VK_SHADER_STAGE_COMPUTE_BIT,
+            0, t->constsize, p->constants );
       }
       vkCmdDispatchBase( t->command, p->baseX, p->baseY, p->baseZ,
          p->countX, p->countY, p->countZ );
@@ -748,7 +748,7 @@ static bool vcp_task_prepare( VcpTask t ) {
 
 
 VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
-   VcpStr entry, uint32_t nstorage
+   VcpStr entry, uint32_t nstorage, uint32_t constsize
 ) {
    vcpResult = VK_ERROR_INVALID_SHADER_NV;
    if ( 0 == size ) return NULL;
@@ -777,6 +777,7 @@ VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
    ret->desc = 0;
    ret->npart = 0;
    ret->parts = NULL;
+   ret->constsize = constsize;
    ret->running = 0;
    ret->entry = tentry;
    ret->nstorage = nstorage;
@@ -795,9 +796,9 @@ VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
 
 
 VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename,
-   VcpStr entry, uint32_t nstorage )  
+   VcpStr entry, uint32_t nstorage, uint32_t constsize )
 {
-   uint64_t size = 0;	
+   uint64_t size = 0;
    char * data = NULL;
    FILE * fh = fopen( filename, "rb" );
    if ( fh ) {
@@ -824,7 +825,7 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename,
    }
    VcpTask ret = NULL;
    if ( VK_SUCCESS == vcpResult )
-      ret = vcp_task_create( v, data, size, entry, nstorage );
+      ret = vcp_task_create( v, data, size, entry, nstorage, constsize );
    if ( data )
       data = VCP_REALLOC( data, char, 0 );
    return ret;
@@ -858,8 +859,8 @@ static void vcp_part_clear( VcpPart * p ) {
    p->constants = NULL;
 }
 
-void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t constsize,
-   uint32_t gx, uint32_t gy, uint32_t gz )
+void vcp_task_setup( VcpTask t, VcpStorage * storages,
+   uint32_t gx, uint32_t gy, uint32_t gz, void * constants )
 {
    for ( int i=0; i < t->nstorage; ++i ) {
       if ( ! storages[i] ) {
@@ -876,12 +877,12 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t constsize,
    VcpPart * ps = VCP_REALLOC( t->parts, VcpPart, 1 );
    if ( ! ps ) return;
    t->npart = 1;
-   t->constsize = constsize;
    t->parts = ps;
    vcp_part_clear( ps );
    ps->countX = gx;
    ps->countY = gy;
    ps->countZ = gz;
+   ps->constants = constants;
    vcpResult = VCP_SUCCESS;
 }
 
