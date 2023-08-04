@@ -11,7 +11,10 @@ typedef struct Vcp__Storage * VcpStorage;
 typedef struct Vcp__Task * VcpTask;
 
 typedef struct Vcp_Part {
+   /// area to process
    uint32_t baseX, baseY, baseZ, countX, countY, countZ;
+   /// used constant values
+   void * constants;
 } VcpPart;
 
 #define VCP_SUCCESS 0
@@ -57,9 +60,9 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry,
    uint32_t nstorage );
 /// setup task
 void vcp_task_setup( VcpTask t, VcpStorage * storages,
-   uint32_t gx, uint32_t gy, uint32_t gz );
+   uint32_t constsize, uint32_t gx, uint32_t gy, uint32_t gz );
 /// setup task repeat
-void vcp_task_parts( VcpTask t, uint32_t nparts, VcpPart * parts );
+VcpPart * vcp_task_parts( VcpTask t, uint32_t nparts );
 /// start task
 void vcp_task_start( VcpTask t );
 /// wait task to finish

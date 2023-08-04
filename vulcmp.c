@@ -36,6 +36,7 @@ typedef struct Vcp__Task {
    VkPipeline pipe;
    VkFence fence;
    bool running;
+   uint32_t constsize;
    uint32_t npart;
    VcpPart * parts;
    VcpStr entry;
@@ -401,14 +402,19 @@ static void vcp_create_desclay( VcpTask t ) {
 
 /// create pipeline layout
 static void vcp_create_pipelay( VcpTask t ) {
+   VkPushConstantRange pcr = {
+      .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
+      .offset = 0,
+      .size = t->constsize
+   };
    VkPipelineLayoutCreateInfo pli = {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
       .pNext = NULL,
       .flags = 0,
       .setLayoutCount = 1,
       .pSetLayouts = & t->desclay,
-      .pushConstantRangeCount = 0,
-      .pPushConstantRanges = 0
+      .pushConstantRangeCount = t->constsize ? 1 : 0,
+      .pPushConstantRanges = &pcr
    };
    vcpResult = vkCreatePipelineLayout( t->vulcomp->device, &pli, NULL,
       & t->pipelay );
@@ -635,6 +641,10 @@ static bool vcp_build_command( VcpTask t ) {
       if ( 0 < j ) {
          vkCmdPipelineBarrier( t->command, psf, psf,
             0, 1, & t->vulcomp->barrier, 0, NULL, 0, NULL );
+         if ( p->constants ) {
+            vkCmdPushConstants( t->command, t->pipelay, VK_SHADER_STAGE_COMPUTE_BIT,
+               0, t->constsize, p->constants );
+         }
       }
       vkCmdDispatchBase( t->command, p->baseX, p->baseY, p->baseZ,
          p->countX, p->countY, p->countZ );
@@ -838,9 +848,14 @@ void vcp_task_start( VcpTask t ) {
    t->running = ! vcpResult;
 }
 
+static void vcp_part_clear( VcpPart * p ) {
+   p->baseX = p->baseY = p->baseZ = 0;
+   p->countX = p->countY = p->countZ = 0;
+   p->constants = NULL;
+}
 
-void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx,
-   uint32_t gy, uint32_t gz )
+void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t constsize,
+   uint32_t gx, uint32_t gy, uint32_t gz )
 {
    for ( int i=0; i < t->nstorage; ++i ) {
       if ( ! storages[i] ) {
@@ -857,27 +872,30 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx,
    VcpPart * ps = VCP_REALLOC( t->parts, VcpPart, 1 );
    if ( ! ps ) return;
    t->npart = 1;
+   t->constsize = constsize;
    t->parts = ps;
-   ps->baseX = 0;
-   ps->baseY = 0;
-   ps->baseZ = 0;
+   vcp_part_clear( ps );
    ps->countX = gx;
    ps->countY = gy;
    ps->countZ = gz;
    vcpResult = VCP_SUCCESS;
 }
 
-void vcp_task_parts( VcpTask t, uint32_t npart, VcpPart * parts ) {
+VcpPart * vcp_task_parts( VcpTask t, uint32_t npart ) {
    vcpResult = VCP_NOGROUP;
-   if ( 0 == npart ) return;
-   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VcpPart * ps = VCP_REALLOC( t->parts, VcpPart, npart );
-   if ( ! ps ) return;
-   t->npart = npart;
-   t->parts = ps;
-   for ( int i=0; i<npart; ++i)
-      ps[i] = parts[i];
+   if ( 0 == npart ) return NULL;
    vcpResult = VK_SUCCESS;
+   if ( npart == t->npart ) return NULL;
+   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
+   VcpPart * ret = VCP_REALLOC( t->parts, VcpPart, npart );
+   if ( ! ret ) return NULL;
+   vcpResult = VK_SUCCESS;
+   if ( t->npart < npart ) {
+      for ( int i=t->npart; i < npart; ++i )
+         vcp_part_clear( ret+i );
+   }
+   t->npart = npart;
+   return t->parts = ret;
 }
 
 bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec ) {

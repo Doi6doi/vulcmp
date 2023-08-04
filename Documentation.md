@@ -102,6 +102,7 @@ Wait for task to terminate.
 - `VcpPart`: struct used to run task for given parts of space
     - `baseX`,`baseY`,`baseZ`: coorindates of starting group
     - `countX`,`countY`,`countZ`: sizes of area to run task on
+    - `constants`: pointer to shader constants if any
 - `VcpScorer`: function which returns a score for an object to help vulcmp select the best. 
  Larger value is better, less than zero value means object is not suitable, so it wont be selected
 
@@ -114,12 +115,13 @@ Checks last error code (*vcp_error*) and terminates program with an error messag
 
 ---
 ```c
-void vcp_task_parts( VcpTask t, uint32_t nparts, VcpPart * parts );
+VcpPart * void vcp_task_parts( VcpTask t, uint32_t nparts );
 ```
 Setup task to run in parts. Parts will run after each other, with memory barrier between them.
+Each part can have different constants
 - `t`: task handle
-- `nparts`: number of parts to run (count of `parts` array)
-- `parts`: the parts to run in given order
+- `nparts`: number of parts to run
+- `parts`: pointer to nparts writeable records. (task manages the array)
 
 ---
 ```c
