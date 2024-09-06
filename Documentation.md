@@ -195,6 +195,7 @@ Any vulkan [VkResult](https://registry.khronos.org/vulkan/specs/1.3-extensions/m
 
 - `VCP_SUCCESS`: last operation terminated successfully. Same as `VK_SUCCESS`
 - `VCP_TIMEOUT`: `vcp_task_wait` timeouted. Same as `VK_TIMEOUT`
+- `VCP_HOSTMEM`: host memory allocation failed. Same as `VK_ERROR_OUT_OF_HOST_MEMORY`
 - `VCP_NOPHYSICAL`: no suitable physical devices found
 - `VCP_NOFAMILY`: no suitable queue families found
 - `VCP_NOMEMORY`: no suitable GPU memory found
@@ -204,7 +205,7 @@ Any vulkan [VkResult](https://registry.khronos.org/vulkan/specs/1.3-extensions/m
 - `VCP_NOSTORAGE`: storage buffers havent been chosen with `vcp_task_setup` before starting task
 
 ## Example code
-   
+
 A vulcmp program more or less would have the following structure:
 
 ```c

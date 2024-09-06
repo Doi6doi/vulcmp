@@ -5,9 +5,9 @@
 #include "stdio.h"
 #include "string.h"
 
-#define VCP_DEBUG( ... ) { fprintf(stderr, __VA_ARGS__ ); }
-#define VCP_FAIL( ... ) { VCP_DEBUG( __VA_ARGS__ ); exit(1); }
-#define VCP_REALLOC( p, type, n ) (type *)realloc( p, (n)*sizeof(type) )
+#define DEBUG( ... ) { fprintf(stderr, __VA_ARGS__ ); }
+#define FAIL( ... ) { DEBUG( __VA_ARGS__ ); exit(1); }
+#define REALLOC( p, type, n ) (type *)realloc( p, (n)*sizeof(type) )
 
 // maximum number of possible (device or instance) exceptions
 #define VCP_MAXEXT 5
@@ -66,7 +66,7 @@ typedef struct Vcp__Vulcomp {
 
 VcpVulcomp vcp_init( VcpStr appName, uint32_t flags ) {
    vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VcpVulcomp ret = VCP_REALLOC( NULL, Vcp_Vulcomp, 1 );
+   VcpVulcomp ret = REALLOC( NULL, Vcp_Vulcomp, 1 );
    if ( ! ret ) return NULL;
    ret->instance = 0;
    ret->physical = 0;
@@ -133,14 +133,14 @@ bool vcp_has_extensions( VcpVulcomp v, VkPhysicalDevice p ) {
    uint32_t n;
    if (( vcpResult = vkEnumerateDeviceExtensionProperties( p, NULL, &n, NULL )))
       return false;
-   VkExtensionProperties * e = VCP_REALLOC( NULL, VkExtensionProperties, n );
+   VkExtensionProperties * e = REALLOC( NULL, VkExtensionProperties, n );
    if ( !e ) return false;
    bool ok = true;
    for ( int i=0; ok && i< v->ndext; ++i ) {
       if ( ! vcp_has_extension( e, n, v->dexts[i] ))
          ok = false;
    }
-   e = VCP_REALLOC( e, VkExtensionProperties, 0 );
+   e = REALLOC( e, VkExtensionProperties, 0 );
    return ok;
 }
 
@@ -149,7 +149,7 @@ void vcp_select_physical( VcpVulcomp v, VcpScorer s ) {
    if (( vcpResult = vkEnumeratePhysicalDevices(
       v->instance, & nphys, NULL )))
       return;
-   VkPhysicalDevice * phys = VCP_REALLOC( NULL, VkPhysicalDevice, nphys );
+   VkPhysicalDevice * phys = REALLOC( NULL, VkPhysicalDevice, nphys );
    if ( ! phys ) {
       vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
 	  return;
@@ -171,7 +171,7 @@ void vcp_select_physical( VcpVulcomp v, VcpScorer s ) {
    }
    if ( ! v->physical )
       vcpResult = VCP_NOPHYSICAL;
-   phys = VCP_REALLOC( phys, VkPhysicalDevice, 0 );
+   phys = REALLOC( phys, VkPhysicalDevice, 0 );
 }
 
 
@@ -179,7 +179,7 @@ void vcp_select_family( VcpVulcomp v, VcpScorer s ) {
    uint32_t nqfam;
    vkGetPhysicalDeviceQueueFamilyProperties(
       v->physical, &nqfam, 0 );
-   VkQueueFamilyProperties * qfams = VCP_REALLOC( NULL, VkQueueFamilyProperties, nqfam );
+   VkQueueFamilyProperties * qfams = REALLOC( NULL, VkQueueFamilyProperties, nqfam );
    if ( ! qfams ) {
       vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
 	  return;
@@ -198,7 +198,7 @@ void vcp_select_family( VcpVulcomp v, VcpScorer s ) {
    }
    if ( 0 > v->family )
       vcpResult = VCP_NOFAMILY;
-   qfams = VCP_REALLOC( qfams, VkQueueFamilyProperties, 0 );
+   qfams = REALLOC( qfams, VkQueueFamilyProperties, 0 );
 }
 
 int vcp_error() {
@@ -207,7 +207,7 @@ int vcp_error() {
 
 void vcp_check_fail() {
    if ( VK_SUCCESS != vcpResult && VK_TIMEOUT != vcpResult )
-      VCP_FAIL( "Error: vulcomp %d\n", vcpResult );
+      FAIL( "Error: vulcomp %d\n", vcpResult );
 }
 
 /// free command
@@ -226,7 +226,7 @@ static void vcp_task_remove( VcpTask t ) {
    for ( int i = n-1; 0 <= i; --i ) {
       if (tt[i] == t ) {
 	 tt[i] = tt[n-1];
-	 v->tasks = VCP_REALLOC( tt, VcpTask, n-1 );
+	 v->tasks = REALLOC( tt, VcpTask, n-1 );
          -- v->ntask;
 	 return;
       }
@@ -264,9 +264,9 @@ void vcp_task_free( VcpTask t ) {
       vkDestroyShaderModule( d, t->shader, NULL );
       t->shader = 0;
    }
-   t->entry = VCP_REALLOC( (char *)t->entry, char, 0 );
-   t->storages = VCP_REALLOC( t->storages, VcpStorage, 0 );
-   t = VCP_REALLOC( t, Vcp_Task, 0 );
+   t->entry = REALLOC( (char *)t->entry, char, 0 );
+   t->storages = REALLOC( t->storages, VcpStorage, 0 );
+   t = REALLOC( t, Vcp_Task, 0 );
 }
 
 /// remove storage from list
@@ -277,7 +277,7 @@ static void vcp_storage_remove( VcpStorage s ) {
    for ( int i = n-1; 0 <= i; --i ) {
       if (ss[i] == s ) {
 	 ss[i] = ss[n-1];
-	 v->storages = VCP_REALLOC( ss, VcpStorage, n-1 );
+	 v->storages = REALLOC( ss, VcpStorage, n-1 );
          -- v->nstorage;
 	 return;
       }
@@ -295,7 +295,7 @@ void vcp_storage_free( VcpStorage s ) {
       vkDestroyBuffer( s->vulcomp->device, s->buffer, NULL );
       s->buffer = 0;
    }
-   s = VCP_REALLOC( s, Vcp_Storage, 0 );
+   s = REALLOC( s, Vcp_Storage, 0 );
 }
 
 
@@ -313,7 +313,7 @@ void vcp_done( VcpVulcomp v ) {
        v->device = 0;
     }
     vkDestroyInstance( v->instance, NULL );
-    v = VCP_REALLOC( v, Vcp_Vulcomp, 0 );
+    v = REALLOC( v, Vcp_Vulcomp, 0 );
 }
 
 
@@ -377,7 +377,7 @@ static void vcp_create_queue( VcpVulcomp v ) {
 /// create descriptor layout
 static void vcp_create_desclay( VcpTask t ) {
    vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VkDescriptorSetLayoutBinding * dlbs = VCP_REALLOC( NULL, VkDescriptorSetLayoutBinding, t->nstorage );
+   VkDescriptorSetLayoutBinding * dlbs = REALLOC( NULL, VkDescriptorSetLayoutBinding, t->nstorage );
    if ( ! dlbs )
 	  return;
    for ( int i=0; i < t->nstorage; ++i ) {
@@ -399,7 +399,7 @@ static void vcp_create_desclay( VcpTask t ) {
    };
    vcpResult = vkCreateDescriptorSetLayout( t->vulcomp->device,
       & dli, NULL, & t->desclay );
-   dlbs = VCP_REALLOC( dlbs, VkDescriptorSetLayoutBinding, 0 );
+   dlbs = REALLOC( dlbs, VkDescriptorSetLayoutBinding, 0 );
    vcpResult = VK_SUCCESS;
 }
 
@@ -504,9 +504,9 @@ static int vcp_find_memory( VcpVulcomp v, uint32_t bits, uint32_t flags,
 
 VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size ) {
    vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VcpStorage ret = VCP_REALLOC( NULL, Vcp_Storage, 1 );
+   VcpStorage ret = REALLOC( NULL, Vcp_Storage, 1 );
    if ( ! ret ) return NULL;
-   VcpStorage * vstorages = VCP_REALLOC( v->storages,
+   VcpStorage * vstorages = REALLOC( v->storages,
       VcpStorage, v->nstorage+1 );
    if ( ! vstorages ) return NULL;
    vstorages[ v->nstorage++ ] = ret;
@@ -620,8 +620,6 @@ static void vcp_create_desc( VcpTask t ) {
    };
    vcpResult = vkAllocateDescriptorSets( t->vulcomp->device, & dai,
       & t->desc );
-   if ( ! vcpResult )
-      vcp_write_desc( t );
 }
 
 
@@ -671,6 +669,7 @@ static void vcp_create_command( VcpTask t ) {
    vcpResult = vkAllocateCommandBuffers( t->vulcomp->device,
       &cai, &t->command );
    if ( vcpResult ) return;
+   vcp_write_desc( t );
    if ( ! vcp_build_command( t ) )
       vcp_free_command( t );
 }
@@ -695,7 +694,6 @@ static void vcp_storage_turn( VcpStorage s, bool todev ) {
    if ( ! vcpResult )
       s->todev = todev;
 }
-
 
 /// get storage memory address
 void * vcp_storage_address( VcpStorage s ) {
@@ -754,15 +752,15 @@ VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
    if ( 0 == size ) return NULL;
    vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
    int es = strlen( entry );
-   char * tentry = VCP_REALLOC( NULL, char, es+1 );
+   char * tentry = REALLOC( NULL, char, es+1 );
    if ( ! tentry ) return NULL;
    strcpy( tentry, entry );
-   VcpStorage * tstorages = VCP_REALLOC( NULL, VcpStorage, nstorage );
+   VcpStorage * tstorages = REALLOC( NULL, VcpStorage, nstorage );
    if ( ! tstorages ) return NULL;
    memset( tstorages, 0, nstorage * sizeof( VcpStorage ) );
-   VcpTask ret = VCP_REALLOC( NULL, Vcp_Task, 1 );
+   VcpTask ret = REALLOC( NULL, Vcp_Task, 1 );
    if ( ! ret ) return NULL;
-   VcpTask * vtasks = VCP_REALLOC( v->tasks, VcpTask, v->ntask+1 );
+   VcpTask * vtasks = REALLOC( v->tasks, VcpTask, v->ntask+1 );
    if ( ! vtasks ) return NULL;
    vtasks[ v->ntask++ ] = ret;
    v->tasks = vtasks;
@@ -805,7 +803,7 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename,
       fseek( fh, 0L, SEEK_END );
       size = ftell( fh );
       if ( size ) {
-         data = VCP_REALLOC( NULL, char, size );
+         data = REALLOC( NULL, char, size );
          if ( data ) {
 		    fseek( fh, 0L, SEEK_SET );
 		    if ( 1 == fread( data, size, 1, fh )) {
@@ -827,7 +825,7 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename,
    if ( VK_SUCCESS == vcpResult )
       ret = vcp_task_create( v, data, size, entry, nstorage, constsize );
    if ( data )
-      data = VCP_REALLOC( data, char, 0 );
+      data = REALLOC( data, char, 0 );
    return ret;
 }
 
@@ -874,8 +872,9 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages,
       return;
    }
    vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VcpPart * ps = VCP_REALLOC( t->parts, VcpPart, 1 );
+   VcpPart * ps = REALLOC( t->parts, VcpPart, 1 );
    if ( ! ps ) return;
+   vcp_free_command( t );
    t->npart = 1;
    t->parts = ps;
    vcp_part_clear( ps );
@@ -892,7 +891,7 @@ VcpPart * vcp_task_parts( VcpTask t, uint32_t npart ) {
    vcpResult = VK_SUCCESS;
    if ( npart == t->npart ) return NULL;
    vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VcpPart * ret = VCP_REALLOC( t->parts, VcpPart, npart );
+   VcpPart * ret = REALLOC( t->parts, VcpPart, npart );
    if ( ! ret ) return NULL;
    vcpResult = VK_SUCCESS;
    if ( t->npart < npart ) {

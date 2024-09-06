@@ -19,6 +19,7 @@ typedef struct Vcp_Part {
 
 #define VCP_SUCCESS 0
 #define VCP_TIMEOUT 2
+#define VCP_HOSTMEM -1
 #define VCP_NOPHYSICAL -10001
 #define VCP_NOFAMILY -10002
 #define VCP_NOMEMORY -10003
