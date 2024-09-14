@@ -6,16 +6,16 @@
 
 typedef const char * VcpStr;
 typedef enum { VCP_VALIDATION=1, VCP_ATOMIC_FLOAT=2 } VcpFlags;
-typedef struct Vcp__Vulcomp * VcpVulcomp;
-typedef struct Vcp__Storage * VcpStorage;
-typedef struct Vcp__Task * VcpTask;
+typedef struct VcpVulcomp * VcpVulcomp;
+typedef struct VcpStorage * VcpStorage;
+typedef struct VcpTask * VcpTask;
 
-typedef struct Vcp_Part {
+typedef struct VcpPart {
    /// area to process
    uint32_t baseX, baseY, baseZ, countX, countY, countZ;
    /// used constant values
    void * constants;
-} VcpPart;
+} * VcpPart;
 
 #define VCP_SUCCESS 0
 #define VCP_TIMEOUT 2
@@ -63,7 +63,7 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry,
 void vcp_task_setup( VcpTask t, VcpStorage * storages,
    uint32_t gx, uint32_t gy, uint32_t gz, void * constants );
 /// setup task repeat
-VcpPart * vcp_task_parts( VcpTask t, uint32_t nparts );
+VcpPart vcp_task_parts( VcpTask t, uint32_t nparts );
 /// start task
 void vcp_task_start( VcpTask t );
 /// wait task to finish

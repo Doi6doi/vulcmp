@@ -14,7 +14,7 @@
 
 VkResult vcpResult = VK_SUCCESS;
 
-typedef struct Vcp__Storage {
+struct VcpStorage {
    VcpVulcomp vulcomp;
    VkBuffer buffer;
    VkDeviceMemory memory;
@@ -22,10 +22,10 @@ typedef struct Vcp__Storage {
    void * address;
    bool coherent;
    bool todev;
-} Vcp_Storage;
+};
 
 
-typedef struct Vcp__Task {
+struct VcpTask {
    VcpVulcomp vulcomp;
    VkShaderModule shader;
    VkCommandBuffer command;
@@ -38,14 +38,13 @@ typedef struct Vcp__Task {
    bool running;
    uint32_t constsize;
    uint32_t npart;
-   VcpPart * parts;
+   VcpPart parts;
    VcpStr entry;
    uint32_t nstorage;
    VcpStorage * storages;
-} Vcp_Task;
+};
 
-
-typedef struct Vcp__Vulcomp {
+struct VcpVulcomp {
    VkInstance instance;
    VkPhysicalDevice physical;
    int32_t family;
@@ -61,12 +60,12 @@ typedef struct Vcp__Vulcomp {
    VcpStorage * storages;
    uint32_t ntask;
    VcpTask * tasks;
-} Vcp_Vulcomp;
+};
 
 
 VcpVulcomp vcp_init( VcpStr appName, uint32_t flags ) {
-   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VcpVulcomp ret = REALLOC( NULL, Vcp_Vulcomp, 1 );
+   vcpResult = VCP_HOSTMEM;
+   VcpVulcomp ret = REALLOC( NULL, struct VcpVulcomp, 1 );
    if ( ! ret ) return NULL;
    ret->instance = 0;
    ret->physical = 0;
@@ -151,7 +150,7 @@ void vcp_select_physical( VcpVulcomp v, VcpScorer s ) {
       return;
    VkPhysicalDevice * phys = REALLOC( NULL, VkPhysicalDevice, nphys );
    if ( ! phys ) {
-      vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
+      vcpResult = VCP_HOSTMEM;
 	  return;
    }
    if (( vcpResult = vkEnumeratePhysicalDevices(
@@ -181,8 +180,8 @@ void vcp_select_family( VcpVulcomp v, VcpScorer s ) {
       v->physical, &nqfam, 0 );
    VkQueueFamilyProperties * qfams = REALLOC( NULL, VkQueueFamilyProperties, nqfam );
    if ( ! qfams ) {
-      vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-	  return;
+      vcpResult = VCP_HOSTMEM;
+      return;
    }
    vkGetPhysicalDeviceQueueFamilyProperties(
       v->physical, &nqfam, qfams );
@@ -266,7 +265,7 @@ void vcp_task_free( VcpTask t ) {
    }
    t->entry = REALLOC( (char *)t->entry, char, 0 );
    t->storages = REALLOC( t->storages, VcpStorage, 0 );
-   t = REALLOC( t, Vcp_Task, 0 );
+   t = REALLOC( t, struct VcpTask, 0 );
 }
 
 /// remove storage from list
@@ -295,7 +294,7 @@ void vcp_storage_free( VcpStorage s ) {
       vkDestroyBuffer( s->vulcomp->device, s->buffer, NULL );
       s->buffer = 0;
    }
-   s = REALLOC( s, Vcp_Storage, 0 );
+   s = REALLOC( s, struct VcpStorage, 0 );
 }
 
 
@@ -313,7 +312,7 @@ void vcp_done( VcpVulcomp v ) {
        v->device = 0;
     }
     vkDestroyInstance( v->instance, NULL );
-    v = REALLOC( v, Vcp_Vulcomp, 0 );
+    v = REALLOC( v, struct VcpVulcomp, 0 );
 }
 
 
@@ -376,7 +375,7 @@ static void vcp_create_queue( VcpVulcomp v ) {
 
 /// create descriptor layout
 static void vcp_create_desclay( VcpTask t ) {
-   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
+   vcpResult = VCP_HOSTMEM;
    VkDescriptorSetLayoutBinding * dlbs = REALLOC( NULL, VkDescriptorSetLayoutBinding, t->nstorage );
    if ( ! dlbs )
 	  return;
@@ -503,8 +502,8 @@ static int vcp_find_memory( VcpVulcomp v, uint32_t bits, uint32_t flags,
 }
 
 VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size ) {
-   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VcpStorage ret = REALLOC( NULL, Vcp_Storage, 1 );
+   vcpResult = VCP_HOSTMEM;
+   VcpStorage ret = REALLOC( NULL, struct VcpStorage, 1 );
    if ( ! ret ) return NULL;
    VcpStorage * vstorages = REALLOC( v->storages,
       VcpStorage, v->nstorage+1 );
@@ -639,7 +638,7 @@ static bool vcp_build_command( VcpTask t ) {
       t->pipelay, 0, 1, & t->desc, 0, NULL );
    VkPipelineStageFlags psf = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
    for ( int j=0; j < t->npart; ++j ) {
-      VcpPart * p = t->parts+j;
+      VcpPart p = t->parts+j;
       if ( 0 < j ) {
          vkCmdPipelineBarrier( t->command, psf, psf,
             0, 1, & t->vulcomp->barrier, 0, NULL, 0, NULL );
@@ -750,7 +749,7 @@ VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
 ) {
    vcpResult = VK_ERROR_INVALID_SHADER_NV;
    if ( 0 == size ) return NULL;
-   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
+   vcpResult = VCP_HOSTMEM;
    int es = strlen( entry );
    char * tentry = REALLOC( NULL, char, es+1 );
    if ( ! tentry ) return NULL;
@@ -758,7 +757,7 @@ VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
    VcpStorage * tstorages = REALLOC( NULL, VcpStorage, nstorage );
    if ( ! tstorages ) return NULL;
    memset( tstorages, 0, nstorage * sizeof( VcpStorage ) );
-   VcpTask ret = REALLOC( NULL, Vcp_Task, 1 );
+   VcpTask ret = REALLOC( NULL, struct VcpTask, 1 );
    if ( ! ret ) return NULL;
    VcpTask * vtasks = REALLOC( v->tasks, VcpTask, v->ntask+1 );
    if ( ! vtasks ) return NULL;
@@ -812,7 +811,7 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename,
 			   vcpResult = VCP_NOFILE;
 			}
 		 } else {
-			vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
+			vcpResult = VCP_HOSTMEM;
 	     }
 	  } else {
 		  vcpResult = VCP_NOFILE;
@@ -851,7 +850,7 @@ void vcp_task_start( VcpTask t ) {
    t->running = ! vcpResult;
 }
 
-static void vcp_part_clear( VcpPart * p ) {
+static void vcp_part_clear( VcpPart p ) {
    p->baseX = p->baseY = p->baseZ = 0;
    p->countX = p->countY = p->countZ = 0;
    p->constants = NULL;
@@ -871,8 +870,8 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages,
       vcpResult = VCP_NOGROUP;
       return;
    }
-   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VcpPart * ps = REALLOC( t->parts, VcpPart, 1 );
+   vcpResult = VCP_HOSTMEM;
+   VcpPart ps = REALLOC( t->parts, struct VcpPart, 1 );
    if ( ! ps ) return;
    vcp_free_command( t );
    t->npart = 1;
@@ -885,13 +884,13 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages,
    vcpResult = VCP_SUCCESS;
 }
 
-VcpPart * vcp_task_parts( VcpTask t, uint32_t npart ) {
+VcpPart vcp_task_parts( VcpTask t, uint32_t npart ) {
    vcpResult = VCP_NOGROUP;
    if ( 0 == npart ) return NULL;
    vcpResult = VK_SUCCESS;
-   if ( npart == t->npart ) return NULL;
-   vcpResult = VK_ERROR_OUT_OF_HOST_MEMORY;
-   VcpPart * ret = REALLOC( t->parts, VcpPart, npart );
+   if ( npart == t->npart ) return t->parts;
+   vcpResult = VCP_HOSTMEM;
+   VcpPart ret = REALLOC( t->parts, struct VcpPart, npart );
    if ( ! ret ) return NULL;
    vcpResult = VK_SUCCESS;
    if ( t->npart < npart ) {
