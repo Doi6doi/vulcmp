@@ -1,5 +1,5 @@
 NAME=vulcmp
-VER=1.1
+VER=20240914
 ARCH=x64
 LARCH=amd64
 MEMAIL=doinospam@gmail.com
