@@ -9,7 +9,6 @@ RM=del /q
 EH=@echo
 
 MMSVC=nmake /f Makefile.msvc
-MDEB=make
 VLIB=$(NAME).dll
 
 build: $(VLIB)
