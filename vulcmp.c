@@ -285,6 +285,7 @@ static void vcp_storage_remove( VcpStorage s ) {
 
 /// free up storage
 void vcp_storage_free( VcpStorage s ) {
+   if ( !s ) return;
    vcp_storage_remove( s );
    if ( s->memory ) {
       vkFreeMemory( s->vulcomp->device, s->memory, NULL );
@@ -647,8 +648,7 @@ static bool vcp_build_command( VcpTask t ) {
          vkCmdPushConstants( t->command, t->pipelay, VK_SHADER_STAGE_COMPUTE_BIT,
             0, t->constsize, p->constants );
       }
-      vkCmdDispatchBase( t->command, p->baseX, p->baseY, p->baseZ,
-         p->countX, p->countY, p->countZ );
+      vkCmdDispatch( t->command, p->countX, p->countY, p->countZ );
    }
    if (( vcpResult = vkEndCommandBuffer( t->command )))
       return false;
@@ -851,7 +851,6 @@ void vcp_task_start( VcpTask t ) {
 }
 
 static void vcp_part_clear( VcpPart p ) {
-   p->baseX = p->baseY = p->baseZ = 0;
    p->countX = p->countY = p->countZ = 0;
    p->constants = NULL;
 }
@@ -912,5 +911,20 @@ bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec ) {
    return ! t->running;
 }
 
+uint64_t vcp_storage_size( VcpStorage s ) {
+   return s->size;
+}
 
+
+
+void vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, uint32_t di,
+   uint32_t count )
+{
+   vcpResult = VCP_HOSTMEM;
+   if ( src->size < si + count ) return;
+   if ( dst->size < di + count ) return;
+   char * sp = vcp_storage_address( src );
+   char * dp = vcp_storage_address( dst );
+   memcpy( dp + di, sp + si, count );
+}
 

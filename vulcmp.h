@@ -12,7 +12,7 @@ typedef struct VcpTask * VcpTask;
 
 typedef struct VcpPart {
    /// area to process
-   uint32_t baseX, baseY, baseZ, countX, countY, countZ;
+   uint32_t countX, countY, countZ;
    /// used constant values
    void * constants;
 } * VcpPart;
@@ -51,8 +51,13 @@ void vcp_select_queue( VcpVulcomp, VcpScorer );
 VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size );
 /// get storage memory address
 void * vcp_storage_address( VcpStorage s );
+/// get storage size
+uint64_t vcp_storage_size( VcpStorage s );
 /// dispose storage
 void vcp_storage_free( VcpStorage s );
+/// copy storage data
+void vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, uint32_t di,
+   uint32_t count );
 /// create task
 VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, VcpStr entry,
    uint32_t nstorage, uint32_t constsize );

@@ -58,6 +58,22 @@ Memory address of allocated memory. It can be read or written through this point
 
 ---
 ```c
+uint64_t vcp_storage_size( VcpStorage s )
+```
+Size of allocated memory in bytes.
+- `s`: memory handle
+- *returns* allocated memory size
+
+---
+```c
+uint64_t vcp_storage_copy( VcpStorage src, VcpStorage dst,  )
+```
+Size of allocated memory in bytes.
+- `s`: memory handle
+- *returns* allocated memory size
+
+---
+```c
 VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size, VcpStr entry, uint32_t nstorage, uint32_t constsize )
 ```
 Create a new GPU task.
