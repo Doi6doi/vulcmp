@@ -1,5 +1,6 @@
 ALL=mandelbrot
 VCPDIR=..
+RM=rm -f
 SO=$(VCPDIR)/libvulcmp.so
 GLSLC=glslc
 RESULTS=mandelbrot.bmp mandelbrot.spv
