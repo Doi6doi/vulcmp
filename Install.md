@@ -8,7 +8,7 @@ You can run `make -f Makefile.linux help` to see other possible targets
 
 Tools needed to build:
 [gcc](https://gcc.gnu.org/),
-[gnu make](https://www.geeksforgeeks.org/linux-make-command/)
+[make](https://www.geeksforgeeks.org/linux-make-command/)
 
 For .deb package: [dpkg-deb](https://man7.org/linux/man-pages/man1/dpkg-deb.1.html)
 
