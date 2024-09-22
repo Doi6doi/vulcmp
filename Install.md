@@ -7,14 +7,12 @@ Run `make -f Makefile.linux` to build *vulcmp* library
 You can run `make -f Makefile.linux help` to see other possible targets 
 
 Tools needed to build:
-- [gcc](https://gcc.gnu.org/) or other compiler
-- [gnu make](https://www.geeksforgeeks.org/linux-make-command/)
+[gcc](https://gcc.gnu.org/) or other compiler,
+[gnu make](https://www.geeksforgeeks.org/linux-make-command/)
 
-For .deb package:
-- [dpkg-deb](https://man7.org/linux/man-pages/man1/dpkg-deb.1.html)
+For .deb package: [dpkg-deb](https://man7.org/linux/man-pages/man1/dpkg-deb.1.html)
 
-For tests:
-- [glslc](https://github.com/google/shaderc)
+For tests: [glslc](https://github.com/google/shaderc)
 
 ## MSVC
 
@@ -22,13 +20,12 @@ Run `nmake /f Makefile.msvc` to build *vulcmp* library
 
 You can run `nmake /f Makefile.msvc help` to see other possible targets
 
-Tools needed to build:
-- [nmake](https://learn.microsoft.com/en-us/cpp/build/reference/nmake-reference?view=msvc-170)
-- [cl](https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options?view=msvc-170)
-- [link](https://learn.microsoft.com/en-us/cpp/build/reference/linker-options?view=msvc-170)
+Tools needed to build: 
+[nmake](https://learn.microsoft.com/en-us/cpp/build/reference/nmake-reference?view=msvc-170),
+[cl](https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options?view=msvc-170),
+[link](https://learn.microsoft.com/en-us/cpp/build/reference/linker-options?view=msvc-170)
 
-For tests:
-- [glslc](https://github.com/google/shaderc)
+For tests: [glslc](https://github.com/google/shaderc)
 
 # Installation
 
