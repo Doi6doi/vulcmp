@@ -211,6 +211,7 @@ void vcp_check_fail() {
 
 /// free command
 static void vcp_free_command( VcpTask t ) {
+   if ( ! t->command ) return;
    vkFreeCommandBuffers( t->vulcomp->device,
       t->vulcomp->commands, 1, & t->command );
    t->command = 0;
@@ -433,12 +434,12 @@ static void vcp_create_pipe( VcpTask t ) {
       .flags = VK_PIPELINE_CREATE_DISPATCH_BASE,
       .stage = {
          .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-	 .pNext = NULL,
-	 .flags = 0,
-	 .stage = VK_SHADER_STAGE_COMPUTE_BIT,
-	 .module = t->shader,
-	 .pName = t->entry,
-	 .pSpecializationInfo = NULL
+	      .pNext = NULL,
+	      .flags = 0,
+	      .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+	      .module = t->shader,
+	      .pName = t->entry,
+	      .pSpecializationInfo = NULL
       },
       .layout = t->pipelay,
       .basePipelineHandle = 0,
@@ -858,21 +859,19 @@ static void vcp_part_clear( VcpPart p ) {
 void vcp_task_setup( VcpTask t, VcpStorage * storages,
    uint32_t gx, uint32_t gy, uint32_t gz, void * constants )
 {
+   vcpResult = VCP_NOTASK;
+   if ( ! t ) return;
+   vcp_free_command( t );
+   vcpResult = VCP_NOSTORAGE;
    for ( int i=0; i < t->nstorage; ++i ) {
-      if ( ! storages[i] ) {
-         vcpResult = VCP_NOSTORAGE;
-	    return;
-      }
+      if ( ! storages[i] ) return;
       t->storages[i] = storages[i];
    }
-   if ( 0 == gx * gy * gz ) {
-      vcpResult = VCP_NOGROUP;
-      return;
-   }
+   vcpResult = VCP_NOGROUP;
+   if ( 0 == gx * gy * gz ) return;
    vcpResult = VCP_HOSTMEM;
    VcpPart ps = REALLOC( t->parts, struct VcpPart, 1 );
    if ( ! ps ) return;
-   vcp_free_command( t );
    t->npart = 1;
    t->parts = ps;
    vcp_part_clear( ps );
@@ -891,6 +890,7 @@ VcpPart vcp_task_parts( VcpTask t, uint32_t npart ) {
    vcpResult = VCP_HOSTMEM;
    VcpPart ret = REALLOC( t->parts, struct VcpPart, npart );
    if ( ! ret ) return NULL;
+   vcp_free_command( t );
    vcpResult = VK_SUCCESS;
    if ( t->npart < npart ) {
       for ( int i=t->npart; i < npart; ++i )

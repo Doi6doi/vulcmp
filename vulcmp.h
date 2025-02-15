@@ -27,6 +27,7 @@ typedef struct VcpPart {
 #define VCP_RUNNING -10005
 #define VCP_NOGROUP -10006
 #define VCP_NOSTORAGE -10007
+#define VCP_NOTASK -10008
 
 /// vulkan handle score function
 typedef int32_t (* VcpScorer )( void * );
