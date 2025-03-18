@@ -14,7 +14,7 @@
 
 VkResult vcpResult = VK_SUCCESS;
 
-struct VcpStorage {
+struct Vcp_Storage {
    VcpVulcomp vulcomp;
    VkBuffer buffer;
    VkDeviceMemory memory;
@@ -24,8 +24,14 @@ struct VcpStorage {
    bool todev;
 };
 
+typedef struct Vcp_Transfer {
+   VcpVulcomp vulcomp;
+   VkCommandBuffer command;
+   VkFence fence;
+} * VcpTransfer;
 
-struct VcpTask {
+
+struct Vcp_Task {
    VcpVulcomp vulcomp;
    VkShaderModule shader;
    VkCommandBuffer command;
@@ -44,10 +50,11 @@ struct VcpTask {
    VcpStorage * storages;
 };
 
-struct VcpVulcomp {
+struct Vcp_Vulcomp {
    VkInstance instance;
    VkPhysicalDevice physical;
    int32_t family;
+   int32_t flags;
    VkDevice device;
    VkQueue queue;
    VkCommandPool commands;
@@ -60,12 +67,33 @@ struct VcpVulcomp {
    VcpStorage * storages;
    uint32_t ntask;
    VcpTask * tasks;
+   struct Vcp_Transfer trans;
 };
+
+
+/// transzfer inicializálás
+static void vcp_trans_init( VcpTransfer t, VcpVulcomp v ) {
+   t->vulcomp = v;
+   t->command = NULL;
+   t->fence = NULL;
+}
+
+/// transzfer felszámolás
+static void vcp_trans_done( VcpTransfer t ) {
+   if ( t->command ) {
+      vkFreeCommandBuffers( t->vulcomp->device,
+         t->vulcomp->commands, 1, & t->command );
+   }
+   if ( t->fence ) {
+      vkDestroyFence( t->vulcomp->device, t->fence, NULL );
+      t->fence = 0;
+   }
+}
 
 
 VcpVulcomp vcp_init( VcpStr appName, uint32_t flags ) {
    vcpResult = VCP_HOSTMEM;
-   VcpVulcomp ret = REALLOC( NULL, struct VcpVulcomp, 1 );
+   VcpVulcomp ret = REALLOC( NULL, struct Vcp_Vulcomp, 1 );
    if ( ! ret ) return NULL;
    ret->instance = 0;
    ret->physical = 0;
@@ -97,12 +125,15 @@ VcpVulcomp vcp_init( VcpStr appName, uint32_t flags ) {
    ret->barrier = b;
    VcpStr layers[1];
    int nlayers = 0;
+   ret->flags = flags;
    if ( flags & VCP_VALIDATION )
       layers[nlayers++] = "VK_LAYER_KHRONOS_validation";
-   if ( flags & VCP_ATOMIC_FLOAT ) {
+   if ( flags & (VCP_ATOMIC_FLOAT | VCP_8BIT))      
       ret->iexts[ret->niext++] = "VK_KHR_get_physical_device_properties2";
+   if ( flags & VCP_ATOMIC_FLOAT )
       ret->dexts[ret->ndext++] = "VK_EXT_shader_atomic_float";
-   }
+   if ( flags & VCP_8BIT )
+      ret->dexts[ret->ndext++] = "VK_KHR_8bit_storage";
    VkInstanceCreateInfo ici = {
       .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
       .pNext = NULL,
@@ -113,6 +144,7 @@ VcpVulcomp vcp_init( VcpStr appName, uint32_t flags ) {
       .enabledExtensionCount = ret->niext,
       .ppEnabledExtensionNames = ret->iexts
    };
+   vcp_trans_init( & ret->trans, ret );
    vcpResult = vkCreateInstance( &ici, NULL, &(ret->instance) );
    return ret;
 }
@@ -266,7 +298,8 @@ void vcp_task_free( VcpTask t ) {
    }
    t->entry = REALLOC( (char *)t->entry, char, 0 );
    t->storages = REALLOC( t->storages, VcpStorage, 0 );
-   t = REALLOC( t, struct VcpTask, 0 );
+   t->parts = REALLOC( t->parts, struct Vcp_Part, 0 );
+   t = REALLOC( t, struct Vcp_Task, 0 );
 }
 
 /// remove storage from list
@@ -296,7 +329,7 @@ void vcp_storage_free( VcpStorage s ) {
       vkDestroyBuffer( s->vulcomp->device, s->buffer, NULL );
       s->buffer = 0;
    }
-   s = REALLOC( s, struct VcpStorage, 0 );
+   s = REALLOC( s, struct Vcp_Storage, 0 );
 }
 
 
@@ -305,6 +338,7 @@ void vcp_done( VcpVulcomp v ) {
        vcp_storage_free( v->storages[i] );
     for ( int i=v->ntask-1; 0 <= i; --i )
        vcp_task_free( v->tasks[i] );
+    vcp_trans_done( &v->trans );
     if ( v->commands ) {
        vkDestroyCommandPool( v->device, v->commands, NULL );
        v->commands = 0;
@@ -314,7 +348,7 @@ void vcp_done( VcpVulcomp v ) {
        v->device = 0;
     }
     vkDestroyInstance( v->instance, NULL );
-    v = REALLOC( v, struct VcpVulcomp, 0 );
+    v = REALLOC( v, struct Vcp_Vulcomp, 0 );
 }
 
 
@@ -337,7 +371,8 @@ int vcp_physical_score( void * p ) {
 
 int vcp_family_score( void * f ) {
    VkQueueFamilyProperties * qfp = (VkQueueFamilyProperties *)f;
-   if ( qfp->queueFlags & VK_QUEUE_COMPUTE_BIT )
+   VkQueueFlagBits bits = VK_QUEUE_COMPUTE_BIT | VK_QUEUE_TRANSFER_BIT;
+   if ( bits == (qfp->queueFlags & bits) )
       return 1;
       else return -1;
 }
@@ -365,6 +400,15 @@ static void vcp_create_device( VcpVulcomp v ) {
 	  .ppEnabledExtensionNames = v->dexts,
 	  .pEnabledFeatures = NULL
    };
+   VkPhysicalDevice8BitStorageFeatures d8f = {
+      .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES,
+      .pNext = NULL,
+      .storageBuffer8BitAccess = VK_TRUE,
+      .uniformAndStorageBuffer8BitAccess = VK_TRUE,
+      .storagePushConstant8 = VK_TRUE
+   };
+   if ( v->flags & VCP_8BIT )
+      dci.pNext = &d8f;
    if (( vcpResult = vkCreateDevice(
       v->physical, &dci, NULL, &v->device )))
       return;
@@ -454,7 +498,7 @@ static void vcp_create_commands( VcpVulcomp v ) {
    VkCommandPoolCreateInfo pci = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
       .pNext = NULL,
-      .flags = 0,
+      .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
       .queueFamilyIndex = v->family
    };
    vcpResult = vkCreateCommandPool( v->device, &pci, NULL, & v->commands );
@@ -505,7 +549,7 @@ static int vcp_find_memory( VcpVulcomp v, uint32_t bits, uint32_t flags,
 
 VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size ) {
    vcpResult = VCP_HOSTMEM;
-   VcpStorage ret = REALLOC( NULL, struct VcpStorage, 1 );
+   VcpStorage ret = REALLOC( NULL, struct Vcp_Storage, 1 );
    if ( ! ret ) return NULL;
    VcpStorage * vstorages = REALLOC( v->storages,
       VcpStorage, v->nstorage+1 );
@@ -526,7 +570,9 @@ VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size ) {
 	  .pNext = NULL,
 	  .flags = 0,
 	  .size = size,
-	  .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+	  .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+        | VK_BUFFER_USAGE_TRANSFER_SRC_BIT 
+        | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 	  .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
 	  .queueFamilyIndexCount = 1,
 	  .pQueueFamilyIndices = &index
@@ -555,13 +601,15 @@ VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size ) {
 }
 
 /// create a fence
-static void vcp_create_fence( VcpTask t ) {
+static VkFence vcp_fence_create( VcpVulcomp v ) {
    VkFenceCreateInfo fci = {
       .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
       .pNext = NULL,
       .flags = 0
    };
-   vcpResult = vkCreateFence( t->vulcomp->device, &fci, NULL, &t->fence );
+   VkFence ret;
+   vcpResult = vkCreateFence( v->device, &fci, NULL, &ret );
+   return vcpResult ? NULL : ret;
 }
 
 
@@ -710,8 +758,8 @@ void * vcp_storage_address( VcpStorage s ) {
 /// prepare task for
 static bool vcp_task_prepare( VcpTask t ) {
    if ( ! t->fence ) {
-      vcp_create_fence( t );
-      if ( vcpResult ) return false;
+      if ( ! (t->fence = vcp_fence_create( t->vulcomp )))
+         return false;
    }
    if ( ! t->desclay ) {
       vcp_create_desclay( t );
@@ -758,7 +806,7 @@ VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
    VcpStorage * tstorages = REALLOC( NULL, VcpStorage, nstorage );
    if ( ! tstorages ) return NULL;
    memset( tstorages, 0, nstorage * sizeof( VcpStorage ) );
-   VcpTask ret = REALLOC( NULL, struct VcpTask, 1 );
+   VcpTask ret = REALLOC( NULL, struct Vcp_Task, 1 );
    if ( ! ret ) return NULL;
    VcpTask * vtasks = REALLOC( v->tasks, VcpTask, v->ntask+1 );
    if ( ! vtasks ) return NULL;
@@ -856,6 +904,10 @@ static void vcp_part_clear( VcpPart p ) {
    p->constants = NULL;
 }
 
+uint32_t vcp_flags( VcpVulcomp v ) {
+   return v->flags;
+}
+
 void vcp_task_setup( VcpTask t, VcpStorage * storages,
    uint32_t gx, uint32_t gy, uint32_t gz, void * constants )
 {
@@ -870,7 +922,7 @@ void vcp_task_setup( VcpTask t, VcpStorage * storages,
    vcpResult = VCP_NOGROUP;
    if ( 0 == gx * gy * gz ) return;
    vcpResult = VCP_HOSTMEM;
-   VcpPart ps = REALLOC( t->parts, struct VcpPart, 1 );
+   VcpPart ps = REALLOC( t->parts, struct Vcp_Part, 1 );
    if ( ! ps ) return;
    t->npart = 1;
    t->parts = ps;
@@ -888,7 +940,7 @@ VcpPart vcp_task_parts( VcpTask t, uint32_t npart ) {
    vcpResult = VK_SUCCESS;
    if ( npart == t->npart ) return t->parts;
    vcpResult = VCP_HOSTMEM;
-   VcpPart ret = REALLOC( t->parts, struct VcpPart, npart );
+   VcpPart ret = REALLOC( t->parts, struct Vcp_Part, npart );
    if ( ! ret ) return NULL;
    vcp_free_command( t );
    vcpResult = VK_SUCCESS;
@@ -915,16 +967,101 @@ uint64_t vcp_storage_size( VcpStorage s ) {
    return s->size;
 }
 
+/// transzfer előkészítés
+bool vcp_trans_prepare( VcpTransfer t, VcpStorage src, VcpStorage dst, 
+   uint32_t si, uint32_t di, uint32_t count )
+{
+   vcp_storage_turn( src, true );
+   vcp_storage_turn( dst, true );
+   if ( ! t->fence ) {
+      if ( ! (t->fence = vcp_fence_create( t->vulcomp )))
+         return false;
+   }
+   if ( ! t->command ) {
+      VkCommandBufferAllocateInfo cai = {
+         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+         .pNext = NULL,
+         t->vulcomp->commands,
+         VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+         1
+      };
+      vcpResult = vkAllocateCommandBuffers( t->vulcomp->device,
+         &cai, &t->command );
+      if ( vcpResult ) return false;
+   } else {
+      if (( vcpResult = vkResetCommandBuffer( t->command, 0 )))
+         return false;
+   }
+   VkCommandBufferBeginInfo bbi = {
+      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+      .pNext = NULL,
+      .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+      .pInheritanceInfo = NULL
+   };
+   if (( vcpResult = vkBeginCommandBuffer( t->command, &bbi )))
+      return false;
+   VkBufferCopy bc = { .srcOffset=si, .dstOffset=di, .size=count };
+   vkCmdCopyBuffer( t->command, src->buffer, dst->buffer, 1, &bc );
+   if (( vcpResult = vkEndCommandBuffer( t->command )))
+      return false;
+   return true;
+}
+
+/// transzfer futtatása
+bool vcp_trans_run( VcpTransfer t ) {
+   if (( vcpResult = vkResetFences( t->vulcomp->device,
+      1, &t->fence )))
+      return false;
+   VkSubmitInfo si = {
+	  .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+	  .pNext = NULL,
+	  .waitSemaphoreCount = 0,
+	  .pWaitSemaphores = NULL,
+	  .pWaitDstStageMask = NULL,
+	  .commandBufferCount = 1,
+	  .pCommandBuffers = & t->command,
+	  .signalSemaphoreCount = 0,
+	  .pSignalSemaphores = NULL
+   };
+   if (( vcpResult = vkQueueSubmit( t->vulcomp->queue, 1, & si, t->fence )))
+      return false;
+   if (( vcpResult = vkWaitForFences( t->vulcomp->device, 1, &t->fence, 
+      VK_TRUE, UINT64_MAX )))
+      return false;
+   return true;
+}
 
 
-void vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, uint32_t di,
+bool vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, uint32_t di,
    uint32_t count )
 {
-   vcpResult = VCP_HOSTMEM;
-   if ( src->size < si + count ) return;
-   if ( dst->size < di + count ) return;
-   char * sp = vcp_storage_address( src );
+   vcpResult = VCP_ADDRESS;
+   if ( src->size < si + count ) return false;
+   if ( dst->size < di + count ) return false;
+   VcpTransfer t = &src->vulcomp->trans;
+   if ( ! vcp_trans_prepare( t, src, dst, si, di, count ))
+      return false;
+   return vcp_trans_run( t );
+/*   char * sp = vcp_storage_address( src );
    char * dp = vcp_storage_address( dst );
    memcpy( dp + di, sp + si, count );
+   */
 }
+
+static int vcp_physical_type_cpu( VkPhysicalDeviceType pdt ) {
+   switch ( pdt ) {
+      case VK_PHYSICAL_DEVICE_TYPE_CPU: return 2;
+      case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: return 1;
+      default: return 0;
+   }
+}
+
+int vcp_physical_cpu( void * p ) {
+   VkPhysicalDevice pd = *(VkPhysicalDevice *)p;
+   VkPhysicalDeviceProperties pdp;
+   vkGetPhysicalDeviceProperties( pd, &pdp );
+   return vcp_physical_type_cpu( pdp.deviceType );
+}
+
+
 

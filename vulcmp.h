@@ -1,21 +1,37 @@
 #ifndef VULCOMPH
 #define VULCOMPH
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 
 typedef const char * VcpStr;
-typedef enum { VCP_VALIDATION=1, VCP_ATOMIC_FLOAT=2 } VcpFlags;
-typedef struct VcpVulcomp * VcpVulcomp;
-typedef struct VcpStorage * VcpStorage;
-typedef struct VcpTask * VcpTask;
+typedef enum { VCP_VALIDATION=1, VCP_ATOMIC_FLOAT=2, VCP_8BIT=4 } VcpFlags;
+typedef struct Vcp_Vulcomp * VcpVulcomp;
+typedef struct Vcp_Storage * VcpStorage;
+typedef struct Vcp_Task * VcpTask;
 
-typedef struct VcpPart {
+typedef struct Vcp_Part {
    /// area to process
    uint32_t countX, countY, countZ;
    /// used constant values
    void * constants;
 } * VcpPart;
+
+/// vulkan handle score function
+typedef int32_t (* VcpScorer )( void * );
+
+typedef struct Vcp_Scorers {
+   /// default physical scorer
+   VcpScorer physical_default;
+   /// physical scorer choosing cpu
+   VcpScorer physical_cpu;
+   /// default family scorer
+   VcpScorer family_default;
+} * VcpScorers;
 
 #define VCP_SUCCESS 0
 #define VCP_TIMEOUT 2
@@ -28,13 +44,7 @@ typedef struct VcpPart {
 #define VCP_NOGROUP -10006
 #define VCP_NOSTORAGE -10007
 #define VCP_NOTASK -10008
-
-/// vulkan handle score function
-typedef int32_t (* VcpScorer )( void * );
-/// default physical device score
-int vcp_physical_score( void * p );
-/// default queue family score
-int vcp_family_score( void * f );
+#define VCP_ADDRESS -10009
 
 /// error code
 int vcp_error();
@@ -42,6 +52,8 @@ int vcp_error();
 void vcp_check_fail();
 /// initialize vulcomp system
 VcpVulcomp vcp_init( VcpStr appName, uint32_t flags );
+/// get creation flags
+uint32_t vcp_flags( VcpVulcomp );
 /// terminate vulcomp system
 void vcp_done( VcpVulcomp );
 /// choose best device
@@ -57,7 +69,7 @@ uint64_t vcp_storage_size( VcpStorage s );
 /// dispose storage
 void vcp_storage_free( VcpStorage s );
 /// copy storage data
-void vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, uint32_t di,
+bool vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, uint32_t di,
    uint32_t count );
 /// create task
 VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, VcpStr entry,
@@ -76,5 +88,10 @@ void vcp_task_start( VcpTask t );
 bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec );
 /// dispose task
 void vcp_task_free( VcpTask t );
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif // VULCOMPH
