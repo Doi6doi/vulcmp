@@ -1,20 +1,18 @@
 make {
 
-   import { C; }
-
    init {
       $name := "vulcmp";
       $ver := "20250317";
       $id := "https://github.com/Doi6doi/vulcmp";
       $author := "Várnagy Zoltán";
       $desc := "Simple C library for easy GPU computing.";
+
+      $C := tool( "C", {show:true, libMode:true, debug:true} );
       
-      $clib := C.libFile( $name );
+      $clib := $C.libFile( $name );
       $cs := ["vulcmp.c"];
       $hs := ["vulcmp.h"];
       $purge := [$clib];
-      
-      C.set( {libMode:true, debug:true} );
    }
 
    target {
@@ -40,7 +38,7 @@ make {
    function {
       genLib() {
          if ( older( $clib, $cs + $hs ))
-            C.build( $clib, $cs );
+            $C.build( $clib, $cs );
       }
    }
    
