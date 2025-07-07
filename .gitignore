@@ -9,5 +9,5 @@ vulcmp.geany
 megsem
 c.dep
 p.dep
-p_vulcmp.c
+p_vulcmp.cpp
 ide.txt
