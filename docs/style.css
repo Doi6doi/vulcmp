@@ -1,0 +1,56 @@
+* {
+   box-sizing: border-box;
+}
+
+body {
+   background-color: #efe;
+   padding: 1em;
+}
+
+.hr {
+   height: 3em;
+}
+
+.br {
+   height: 0.2em;
+}
+
+.lbr {
+   height: 1em;
+}
+
+pre {
+   margin: 0;
+}
+
+code {
+   background-color: #eee;
+   padding: 0.3em;
+   border-radius: 0.5em;
+   display: inline-block;
+}
+
+.li {
+   margin-left: 1em;
+   margin-bottom: 0.3em;
+}
+
+.part.field, 
+.part.param, 
+.part.return,
+.parts {
+   margin-left: 2em;
+}
+
+.parts .part.field {
+   margin-left:0;
+}
+
+.cls {
+   border: 1px solid #ddd;
+   border-radius: 1em;
+}
+
+.bullet {
+   margin-right: 0.7em;
+}
