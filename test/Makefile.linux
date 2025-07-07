@@ -1,5 +1,33 @@
-ALL=mandelbrot
-VCPDIR=..
+make {
+
+   init {
+      $all := ["mandelbrot","pmandelbrot"];
+      $vd := "..";
+      $C := tool("C",{});
+      $Cpp := tool("Cpp",{});
+   }
+
+   target {
+      
+      test {
+         build();
+         run();
+      }
+
+      build() {
+         buildMandel();
+         buildPMandel();
+      }
+
+      run() {
+         foreach(i|changeExt($all,exeExt()))
+            exec(i);
+      }
+
+   }
+
+
+
 RM=rm -f
 SO=$(VCPDIR)/libvulcmp.so
 GLSLC=glslc
@@ -14,11 +42,7 @@ all: $(SO) $(ALL:=.run)
 mandelbrot: mandelbrot.c simplebmp.c mandelbrot.spv
 	$(CC) -o $@ mandelbrot.c simplebmp.c -lvulcmp
 
-atom: atom.c atom.spv
-	$(CC) -o $@ $< -lvulcmp
 
-chain: chain.c chain.spv
-	$(CC) -o $@ $< -lvulcmp
 
 %.spv: %.comp
 	$(GLSLC) -o $@ $<

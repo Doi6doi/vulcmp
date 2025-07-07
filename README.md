@@ -1,9 +1,14 @@
-# vulcmp
+# Vulcmp
 
-Simple C library for easy GPU computing. 
+**Vulcmp** is a simple *C* and *C++* library to make GPU computing
+much easier in your programs. It is a wrapper around the Vulkan library
+but it is much more simple to learn and use.
 
-Read [Documentation.md](https://github.com/Doi6doi/vulcmp/blob/main/Documentation.md) for usage details.
+Both the [C library](https://doi6doi.github.io/vytools/C.html) and the [C++ library](https://doi6doi.github.io/vytools/Cpp.html) define a few
+types for the work and their corresponding functions (methods).
 
-Read [Install.md](https://github.com/Doi6doi/vulcmp/blob/main/Install.md) for install instructions.
+For fast use, go directly to [Downloads](https://github.com/Doi6doi/vulcmp/releases).
 
-You don't need to read the un-[LICENSE](https://github.com/Doi6doi/vulcmp/blob/main/LICENSE) because it allows whatever you want.
+To build manually, read [Install](https://doi6doi.github.io/vytools/Install.html)
+
+This library goes with a free [LICENSE](https://github.com/Doi6doi/vulcmp/blob/main/LICENSE).
