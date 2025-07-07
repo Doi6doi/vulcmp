@@ -7,3 +7,6 @@ vulcmp.geany
 /*.dll
 /test/*.exe
 megsem
+c.dep
+p.dep
+p_vulcmp.c
