@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="part file">
+<div class="part">
+<h1>vulcmp.h</h1>
+<div class="lbr"></div>
+
+<a href="index.html">Vulcmp</a> is a <em>C</em> and <em>C++</em> library which
+help you to make GPU computing easily.
+<div class="lbr"></div>
+
+The <code>vulcmp.h</code> header is for the <em>C</em> part.
+It contains the basic types for computing
+and the correspondent functions.
+<div class="lbr"></div>
+
+If compiled with a C++ compiler, all the declarations are in
+the <code>vcpc</code> namespace
+</div>
+<div class="hr"></div><div class="part">
+<h2>Contents</h2><div class="br"></div><div class="part toc">
+<div class="part tocItem">
+<code><a href="#VcpStr">VcpStr</a></code>
+Alias for C string
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#VcpVulcomp">VcpVulcomp</a></code>
+Opaque type for a vulcmp subsystem
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#VcpStorage">VcpStorage</a></code>
+Opaque type for a GPU-usable memory
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#VcpTask">VcpTask</a></code>
+Opaque type for a GPU task (subprogram)
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#Vcp_Part">Vcp_Part</a></code>
+Configuration datas for one run in a multi-run task.
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#VcpScorer">VcpScorer</a></code>
+Scorer function for vulcmp
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#Vcp_Scorers">Vcp_Scorers</a></code>
+Collection of predefined scorers
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_error">vcp_error</a></code>
+Error code of last vulcmp function call
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_check_fail">vcp_check_fail</a></code>
+Check <a href="#vcp_error">vcp_error</a> and halt program if not ok
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_init">vcp_init</a></code>
+Initialize vulcomp system
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_flags">vcp_flags</a></code>
+Get Vulcmp creation flags
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_done">vcp_done</a></code>
+Terminate vulcomp system
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_select_physical">vcp_select_physical</a></code>
+Set scorer for choosing physical device.
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_select_family">vcp_select_family</a></code>
+Set scorer for choosing queue family.
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_storage_create">vcp_storage_create</a></code>
+Create storage
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_storage_address">vcp_storage_address</a></code>
+Get CPU-address of storage
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_storage_size">vcp_storage_size</a></code>
+Get storage size
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_storage_free">vcp_storage_free</a></code>
+Dispose storage
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_task_parts">vcp_task_parts</a></code>
+Setup multi-run task.
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_task_start">vcp_task_start</a></code>
+Start task on GPU
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_task_wait">vcp_task_wait</a></code>
+Wait for task to finish
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_task_free">vcp_task_free</a></code>
+Dispose task
+</div>
+
+</div>
+
+</div>
+<div class="hr"></div><div class="part">
+<h2>Details</h2>
+</div>
+<div class="hr"></div><div class="part type" id="VcpStr">
+<pre><code>VcpStr</code></pre>
+<div class="br"></div>Alias for C string
+</div>
+<div class="hr"></div><div class="part type" id="VcpVulcomp">
+<pre><code>VcpVulcomp</code></pre>
+<div class="br"></div>Opaque type for a vulcmp subsystem
+</div>
+<div class="hr"></div><div class="part type" id="VcpStorage">
+<pre><code>VcpStorage</code></pre>
+<div class="br"></div>Opaque type for a GPU-usable memory
+</div>
+<div class="hr"></div><div class="part type" id="VcpTask">
+<pre><code>VcpTask</code></pre>
+<div class="br"></div>Opaque type for a GPU task (subprogram)
+</div>
+<div class="hr"></div><div class="part">
+Flags for vulcomp initialization
+</div>
+<div class="hr"></div><div class="part">
+Use validation layer. It will show messages about Vulkan errors
+</div>
+<div class="hr"></div><div class="part">
+Needed to use atomic float operations in shaders
+</div>
+<div class="hr"></div><div class="part">
+Needed to use uint8 and int8 types in shaders
+</div>
+<div class="hr"></div><div class="part record" id="Vcp_Part">
+<pre><code>struct Vcp_Part</code></pre>
+<div class="br"></div>Configuration datas for one run in a multi-run task.<div class="br"></div><div class="part field" id="Vcp_Part.countX">
+<code>countX</code> Group count for X coordinate
+</div>
+<div class="br"></div><div class="part field" id="Vcp_Part.countY">
+<code>countY</code> Group count for Y coordinate
+</div>
+<div class="br"></div><div class="part field" id="Vcp_Part.countZ">
+<code>countZ</code> Group count for Z coordinate
+</div>
+<div class="br"></div><div class="part field" id="Vcp_Part.constants">
+<code>constants</code> Constant values for part
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="VcpScorer">
+<pre><code>int32_t (* VcpScorer )( void * x)</code></pre>
+<div class="br"></div>Scorer function for vulcmp
+to choose physical device or queue family.
+The item with the largest value will be chosen.
+Negative score items will not be chosen.<div class="br"></div><div class="part param">
+<code>x</code> The item being scored
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> Score value
+</div>
+
+</div>
+<div class="hr"></div><div class="part record" id="Vcp_Scorers">
+<pre><code>struct Vcp_Scorers</code></pre>
+<div class="br"></div>Collection of predefined scorers<div class="br"></div><div class="part field" id="Vcp_Scorers.physical_default">
+<code>physical_default</code> Default physical scorer.
+Chooses a dedicated GPU
+</div>
+<div class="br"></div><div class="part field" id="Vcp_Scorers.physical_cpu">
+<code>physical_cpu</code> Scorer which chooses a CPU
+</div>
+<div class="br"></div><div class="part field" id="Vcp_Scorers.family_default">
+<code>family_default</code> Default family scorer.
+Chooses a usable queue family
+</div>
+
+</div>
+<div class="hr"></div><div class="part">
+Vulcmp error values
+</div>
+<div class="hr"></div><div class="part">
+Successful execution
+</div>
+<div class="hr"></div><div class="part">
+Timeout during <a href="#vcp_task_wait">vcp_task_wait</a>
+</div>
+<div class="hr"></div><div class="part">
+Not enough host memory
+</div>
+<div class="hr"></div><div class="part">
+No physical device found
+</div>
+<div class="hr"></div><div class="part">
+No queue family found
+</div>
+<div class="hr"></div><div class="part">
+No GPU memory found
+</div>
+<div class="hr"></div><div class="part">
+Cannot open file
+</div>
+<div class="hr"></div><div class="part">
+Task already running
+</div>
+<div class="hr"></div><div class="part">
+Empty group size given
+</div>
+<div class="hr"></div><div class="part">
+Empty storage handle given
+</div>
+<div class="hr"></div><div class="part">
+Empty task handle given
+</div>
+<div class="hr"></div><div class="part">
+Storage size mismatch
+</div>
+<div class="hr"></div><div class="part func" id="vcp_error">
+<pre><code>int vcp_error()</code></pre>
+<div class="br"></div>Error code of last vulcmp function call<div class="br"></div><div class="part return">
+<code>return</code> Error code (<a href="#VcpResult">VcpResult</a> or <a href="https://registry.khronos.org/vulkan/specs/latest/man/html/VkResult.html">VkResult</a>)
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_check_fail">
+<pre><code>void vcp_check_fail()</code></pre>
+<div class="br"></div>Check <a href="#vcp_error">vcp_error</a> and halt program if not ok
+</div>
+<div class="hr"></div><div class="part func" id="vcp_init">
+<pre><code>VcpVulcomp vcp_init( VcpStr appName, uint32_t flags )</code></pre>
+<div class="br"></div>Initialize vulcomp system
+Can be called more times if more GPU-s are used.<div class="br"></div><div class="part param">
+<code>appName</code> Name of the application (forwarded to vulkan)
+</div>
+<div class="br"></div><div class="part param">
+<code>flags</code> Or-ed <a href="#VcpFlags">VcpFlags</a> values
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> Vulcmp handle
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_flags">
+<pre><code>uint32_t vcp_flags( VcpVulcomp v )</code></pre>
+<div class="br"></div>Get Vulcmp creation flags<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp handle
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> Flags used for initialization
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_done">
+<pre><code>void vcp_done( VcpVulcomp v )</code></pre>
+<div class="br"></div>Terminate vulcomp system<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp handle
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_select_physical">
+<pre><code>void vcp_select_physical( VcpVulcomp v, VcpScorer s )</code></pre>
+<div class="br"></div>Set scorer for choosing physical device.
+Must be called before any task or storage creation.<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp handle
+</div>
+<div class="br"></div><div class="part param">
+<code>s</code> Physical device scorer. Called with <a href="https://registry.khronos.org/vulkan/specs/latest/man/html/VkPhysicalDevice.html">VkPhysicalDevice</a>
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_select_family">
+<pre><code>void vcp_select_family( VcpVulcomp v, VcpScorer s )</code></pre>
+<div class="br"></div>Set scorer for choosing queue family.
+Must be called before any task or storage creation.<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp handle
+</div>
+<div class="br"></div><div class="part param">
+<code>s</code> Queue family scorer. Called with <a href="https://registry.khronos.org/vulkan/specs/latest/man/html/VkQueueFamilyProperties.html">VkQueueFamilyProperties</a>
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_storage_create">
+<pre><code>VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size )</code></pre>
+<div class="br"></div>Create storage
+Returns NULL on error<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp handle
+</div>
+<div class="br"></div><div class="part param">
+<code>size</code> Memory size in bytes
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> Storage handle or NULL on error
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_storage_address">
+<pre><code>void * vcp_storage_address( VcpStorage s )</code></pre>
+<div class="br"></div>Get CPU-address of storage<div class="br"></div><div class="part param">
+<code>s</code> Storage handle
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> Memory address
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_storage_size">
+<pre><code>uint64_t vcp_storage_size( VcpStorage s )</code></pre>
+<div class="br"></div>Get storage size<div class="br"></div><div class="part param">
+<code>s</code> Storage handle
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> Memory size in bytes
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_storage_free">
+<pre><code>void vcp_storage_free( VcpStorage s )</code></pre>
+<div class="br"></div>Dispose storage
+Usually not needed because <a href="#vcp_done">vcp_done</a> frees used storages.<div class="br"></div><div class="part param">
+<code>s</code> Storage handle
+</div>
+
+</div>
+<div class="hr"></div><div class="part">
+GPU-copy of a storage part
+Usually faster than memcpy because data is not synced with CPU<div class="br"></div><div class="part param">
+<code>src</code> Source storage handle
+</div>
+<div class="hr"></div><div class="part param">
+<code>dst</code> Destination storage handle
+</div>
+<div class="hr"></div><div class="part param">
+<code>si</code> Index of first copied byte in <code>src</code>
+</div>
+<div class="hr"></div><div class="part param">
+<code>di</code> Index of first copied byte in <code>dst</code>
+</div>
+<div class="hr"></div><div class="part param">
+<code>count</code> Number of bytes to copy
+</div>
+<div class="hr"></div><div class="part return">
+<code>return</code> <code>true</code> on success
+</div>
+
+</div>
+<div class="hr"></div><div class="part">
+Create a GPU task<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp handle
+</div>
+<div class="hr"></div><div class="part param">
+<code>data</code> Address of <a href="https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html">SPIR-V</a> compute module
+</div>
+<div class="hr"></div><div class="part param">
+<code>size</code> Size of <code>data</code> in bytes
+</div>
+<div class="hr"></div><div class="part param">
+<code>entry</code> Name of executable function in <code>data</code>
+</div>
+<div class="hr"></div><div class="part param">
+<code>nstorage</code> Number of storages used by task
+</div>
+<div class="hr"></div><div class="part param">
+<code>constsize</code> Size of constant data in bytes
+</div>
+<div class="hr"></div><div class="part return">
+<code>return</code> Task handle or NULL on error
+</div>
+
+</div>
+<div class="hr"></div><div class="part">
+Create a GPU task by file<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp handle
+</div>
+<div class="hr"></div><div class="part param">
+<code>filename</code> Name of file containing <a href="https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html">SPIR-V</a> compute module
+</div>
+<div class="hr"></div><div class="part param">
+<code>entry</code> Name of executable function in <code>data</code>
+</div>
+<div class="hr"></div><div class="part param">
+<code>nstorage</code> Number of storages used by task
+</div>
+<div class="hr"></div><div class="part param">
+<code>constsize</code> Size of constant data in bytes
+</div>
+<div class="hr"></div><div class="part return">
+<code>return</code> Task handle or NULL on error
+</div>
+
+</div>
+<div class="hr"></div><div class="part">
+Setup task before first run<div class="br"></div><div class="part param">
+<code>t</code> Task handle
+</div>
+<div class="hr"></div><div class="part param">
+<code>storages</code> Handles of storages used by task
+</div>
+<div class="hr"></div><div class="part param">
+<code>gx</code> Number of groups on X coordinate
+</div>
+<div class="hr"></div><div class="part param">
+<code>gy</code> Number of groups on Y coordinate
+</div>
+<div class="hr"></div><div class="part param">
+<code>gz</code> Number of groups on Z coordinate
+</div>
+<div class="hr"></div><div class="part param">
+<code>constants</code> Constant values for the task
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_task_parts">
+<pre><code>VcpPart vcp_task_parts( VcpTask t, uint32_t nparts )</code></pre>
+<div class="br"></div>Setup multi-run task.<div class="br"></div><div class="part param">
+<code>t</code> Task handle
+</div>
+<div class="br"></div><div class="part param">
+<code>nparts</code> Number of consecutive runs of <code>t</code>
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> Pointer to <a href="#Vcp_Part">Vcp_Part</a> array. The values can be modified and will be used on task run.
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_task_start">
+<pre><code>void vcp_task_start( VcpTask t )</code></pre>
+<div class="br"></div>Start task on GPU<div class="br"></div><div class="part param">
+<code>t</code> Task handle
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_task_wait">
+<pre><code>bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec )</code></pre>
+<div class="br"></div>Wait for task to finish<div class="br"></div><div class="part param">
+<code>t</code> Task handle
+</div>
+<div class="br"></div><div class="part param">
+<code>timeoutMsec</code> Timeout in milliseconds
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> <code>true</code> on success or error, <code>false</code> on timeout
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="vcp_task_free">
+<pre><code>void vcp_task_free( VcpTask t )</code></pre>
+<div class="br"></div>Dispose task
+Usually not needed because <a href="#vcp_done">vcp_done</a> frees up all task resources.<div class="br"></div><div class="part param">
+<code>t</code> Task handle
+</div>
+
+</div>
+
+</div>
+
+</body></html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="part file">
+<div class="part">
+<h1>vulcmp.hpp</h1>
+<div class="lbr"></div>
+
+<a href="index.html">Vulcmp</a> is a <em>C</em> and <em>C++</em> library which
+help you to make GPU computing easily.
+<div class="lbr"></div>
+
+The <code>vulcmp.hpp</code> header is for the <em>C++</em> part.
+It contains the basic classes for computing
+and the correspondent methods.
+<div class="lbr"></div>
+
+All the declarations are in the <code>vcp</code> namespace
+</div>
+<div class="hr"></div><div class="part">
+<h2>Contents</h2><div class="br"></div><div class="part toc">
+<div class="part tocItem">
+<code><a href="#Str">Str</a></code>
+Shorthand for C string
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#Scorer">Scorer</a></code>
+Scorer function for vulcmp
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#Vulcomp">Vulcomp</a></code>
+Vulcmp system
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#Storage">Storage</a></code>
+GPU-accessible memory
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#VExc">VExc</a></code>
+Exception thrown on error
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#Part">Part</a></code>
+Configuration datas for one run in a multi-run task.
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#Task">Task</a></code>
+Task (subprogram) to run on GPU
+</div>
+
+</div>
+
+</div>
+<div class="hr"></div><div class="part">
+<h2>Details</h2>
+</div>
+<div class="hr"></div><div class="part type" id="Str">
+<pre><code>Str</code></pre>
+<div class="br"></div>Shorthand for C string
+</div>
+<div class="hr"></div><div class="part func" id="Scorer">
+<pre><code>int32_t (* Scorer )( void * x )</code></pre>
+<div class="br"></div>Scorer function for vulcmp
+to choose physical device or queue family.
+The item with the largest value will be chosen.
+Negative score items will not be chosen.<div class="br"></div><div class="part param">
+<code>x</code> The item being scored
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> Score value
+</div>
+
+</div>
+<div class="hr"></div><div class="part">
+Flags for vulcomp initialization
+</div>
+<div class="hr"></div><div class="part">
+Use validation layer. It will show messages about Vulkan errors
+</div>
+<div class="hr"></div><div class="part">
+Needed to use atomic float operations in shaders
+</div>
+<div class="hr"></div><div class="part">
+Needed to use uint8 and int8 types in shaders
+</div>
+<div class="hr"></div><div class="part cls" id="Vulcomp">
+<pre><code>class Vulcomp</code></pre>
+<div class="br"></div>Vulcmp system<div class="br"></div><div class="parts">
+<div class="part func" id="Vulcomp.Vulcomp">
+<pre><code>Vulcomp( Str name, uint32_t flags )</code></pre>
+<div class="br"></div>Start Vulcmp system<div class="br"></div><div class="part param">
+<code>name</code> Program name forwarded to vulkan
+</div>
+<div class="br"></div><div class="part param">
+<code>flags</code> Initialization flags (<a href="#Flags">Flags</a>)
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Vulcomp.~Vulcomp">
+<pre><code>~Vulcomp()</code></pre>
+<div class="br"></div>Terminate Vulcmp system
+</div>
+<div class="hr"></div><div class="part func" id="Vulcomp.flags">
+<pre><code>uint32_t flags()</code></pre>
+<div class="br"></div>Initialization flags<div class="br"></div><div class="part return">
+<code>return</code> Flag mask
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Vulcomp.selectPhysical">
+<pre><code>void selectPhysical( Scorer & s )</code></pre>
+<div class="br"></div>Set scorer for choosing physical device.
+Must be called before any task or storage creation.<div class="br"></div><div class="part param">
+<code>s</code> Physical device scorer. Called with <a href="https://registry.khronos.org/vulkan/specs/latest/man/html/VkPhysicalDevice.html">VkPhysicalDevice</a>
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Vulcomp.selectFamily">
+<pre><code>void selectFamily( Scorer & s)</code></pre>
+<div class="br"></div>Set scorer for choosing queue family.
+Must be called before any task or storage creation.<div class="br"></div><div class="part param">
+<code>s</code> Queue family scorer. Called with <a href="VkQueueFamilyProperties.html">VkQueueFamilyProperties</a>(https://registry.khronos.org/vulkan/specs/latest/man/html/VkQueueFamilyProperties.html&gt;
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Vulcomp.handle">
+<pre><code>void * handle()</code></pre>
+<div class="br"></div>Handle for C interface<div class="br"></div><div class="part return">
+<code>return</code> Vulcmp handle
+</div>
+
+</div>
+
+</div>
+</div>
+<div class="hr"></div><div class="part cls" id="Storage">
+<pre><code>class Storage</code></pre>
+<div class="br"></div>GPU-accessible memory<div class="br"></div><div class="parts">
+<div class="part func" id="Storage.Storage">
+<pre><code>Storage( Vulcomp & v, uint64_t size )</code></pre>
+<div class="br"></div>Allocate memory<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp system
+</div>
+<div class="br"></div><div class="part param">
+<code>size</code> Size of memory in bytes
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Storage.~Storage">
+<pre><code>~Storage()</code></pre>
+<div class="br"></div>Dispose memory
+</div>
+<div class="hr"></div><div class="part func" id="Storage.address">
+<pre><code>void * address()</code></pre>
+<div class="br"></div>Address<div class="br"></div><div class="part return">
+<code>return</code> CPU address of memory
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Storage.size">
+<pre><code>uint64_t size()</code></pre>
+<div class="br"></div>Size<div class="br"></div><div class="part return">
+<code>return</code> Memory size in bytes
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Storage.copy">
+<pre><code>void copy( Storage & dst, uint32_t si, uint32_t di, uint32_t count )</code></pre>
+<div class="br"></div>GPU-copy of a storage part
+Usually faster than memcpy because data is not synced with CPU<div class="br"></div><div class="part param">
+<code>dst</code> Destination storage handle
+</div>
+<div class="br"></div><div class="part param">
+<code>si</code> Index of first copied byte in this
+</div>
+<div class="br"></div><div class="part param">
+<code>di</code> Index of first copied byte in <code>dst</code>
+</div>
+<div class="br"></div><div class="part param">
+<code>count</code> Number of bytes to copy
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Storage.handle">
+<pre><code>void * handle()</code></pre>
+<div class="br"></div>Handle for C interface<div class="br"></div><div class="part return">
+<code>return</code> Storage handle
+</div>
+
+</div>
+
+</div>
+</div>
+<div class="hr"></div><div class="part cls" id="VExc">
+<pre><code>struct VExc</code></pre>
+<div class="br"></div>Exception thrown on error<div class="br"></div><div class="parts">
+<div class="part field" id="VExc.code">
+<code>code</code> Error code. See <a href="C.html">C library</a>
+</div>
+<div class="hr"></div><div class="part func" id="VExc.VExc">
+<pre><code>VExc(int code)</code></pre>
+<div class="br"></div>Create new <code>VExc</code>.<div class="br"></div><div class="part param">
+<code>code</code> Error code
+</div>
+
+</div>
+
+</div>
+</div>
+<div class="hr"></div><div class="part cls" id="Part">
+<pre><code>struct Part</code></pre>
+<div class="br"></div>Configuration datas for one run in a multi-run task.<div class="br"></div><div class="parts">
+<div class="part field" id="Part.countX">
+<code>countX</code> Group count for X coordinate
+</div>
+<div class="hr"></div><div class="part field" id="Part.countY">
+<code>countY</code> Group count for Y coordinate
+</div>
+<div class="hr"></div><div class="part field" id="Part.countZ">
+<code>countZ</code> Group count for Z coordinate
+</div>
+<div class="hr"></div><div class="part field" id="Part.constants">
+<code>constants</code> Constant values for part
+</div>
+
+</div>
+</div>
+<div class="hr"></div><div class="part cls" id="Task">
+<pre><code>class Task</code></pre>
+<div class="br"></div>Task (subprogram) to run on GPU<div class="br"></div><div class="parts">
+<div class="part">
+Create new task<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp system
+</div>
+<div class="hr"></div><div class="part param">
+<code>data</code> Address of <a href="https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html">SPIR-V</a> compute module
+</div>
+<div class="hr"></div><div class="part param">
+<code>size</code> Size of <code>data</code> in bytes
+</div>
+<div class="hr"></div><div class="part param">
+<code>entry</code> Name of executable function in <code>data</code>
+</div>
+<div class="hr"></div><div class="part param">
+<code>nstorage</code> Number of storages used by task
+</div>
+<div class="hr"></div><div class="part param">
+<code>constsize</code> Size of constant data in bytes
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Task.Task">
+<pre><code>Task( Vulcomp & v, Str filename, Str entry, uint32_t nstorage, uint32_t constsize )</code></pre>
+<div class="br"></div>Create a GPU task by file<div class="br"></div><div class="part param">
+<code>v</code> Vulcmp handle
+</div>
+<div class="br"></div><div class="part param">
+<code>filename</code> Name of file containing <a href="https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html">SPIR-V</a> compute module
+</div>
+<div class="br"></div><div class="part param">
+<code>entry</code> Name of executable function in <code>data</code>
+</div>
+<div class="br"></div><div class="part param">
+<code>nstorage</code> Number of storages used by task
+</div>
+<div class="br"></div><div class="part param">
+<code>constsize</code> Size of constant data in bytes
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Task.~Task">
+<pre><code>~Task()</code></pre>
+<div class="br"></div>Dispose task
+</div>
+<div class="hr"></div><div class="part">
+Setup task before first run<div class="br"></div><div class="part param">
+<code>storages</code> Handles of storages used by task
+</div>
+<div class="hr"></div><div class="part param">
+<code>gx</code> Number of groups on X coordinate
+</div>
+<div class="hr"></div><div class="part param">
+<code>gy</code> Number of groups on Y coordinate
+</div>
+<div class="hr"></div><div class="part param">
+<code>gz</code> Number of groups on Z coordinate
+</div>
+<div class="hr"></div><div class="part param">
+<code>constants</code> Constant values for the task
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Task.parts">
+<pre><code>Part * parts( uint32_t nparts )</code></pre>
+<div class="br"></div>Setup multi-run task.<div class="br"></div><div class="part param">
+<code>nparts</code> Number of consecutive runs of <code>t</code>
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> Pointer to <a href="#Part">Part</a> array. The values can be modified and will be used on task run.
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Task.start">
+<pre><code>void start()</code></pre>
+<div class="br"></div>Start task
+</div>
+<div class="hr"></div><div class="part func" id="Task.wait">
+<pre><code>bool wait( uint32_t timeoutMsec )</code></pre>
+<div class="br"></div>Wait for task to finish<div class="br"></div><div class="part param">
+<code>timeoutMsec</code> Timeout in milliseconds
+</div>
+<div class="br"></div><div class="part return">
+<code>return</code> <code>true</code> on success, <code>false</code> on timeout
+</div>
+
+</div>
+<div class="hr"></div><div class="part func" id="Task.handle">
+<pre><code>void * handle()</code></pre>
+<div class="br"></div>Handle for C interface<div class="br"></div><div class="part return">
+<code>return</code> Task handle
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+</body></html>
