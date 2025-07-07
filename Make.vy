@@ -2,16 +2,15 @@ make {
 
    init {
       $name := "vulcmp";
-      $ver := "20250531";
-      $id := "https://github.com/Doi6doi/vulcmp";
+      $ver := "20250707";
+      $gitUrl := "https://github.com/Doi6doi/vulcmp";
       $author := "Várnagy Zoltán";
-      $desc := "Simple C and C++ library for easy GPU computing.";
 
       $cdep := "c.dep";
       $pdep := "p.dep";
 
-      $C := tool( "C", {libMode:true, debug:true, show:true} );
-      $Cpp := tool( "Cpp", { libMode:true, debug:true, show:true });
+      $C := tool( "C", {libMode:true} );
+      $Cpp := tool( "Cpp", { libMode:true});
       
       $clib := $C.libFile( $name );
       $plib := $Cpp.libFile( $name+"p" );
@@ -20,8 +19,9 @@ make {
       $hps := ["vulcmp.hpp"];
       $cps := ["vulcmpp.cpp"];
       $ccs := regexp( $cs, "#(.*)\\.c#", "p_\\1.cpp" );
+      $buildDir := "build";
       $purge := [$clib,$plib,"*"+$C.objExt(), "*"+$Cpp.objExt(),
-         $C.libFile("*"), "*.dep"]+$ccs;
+         $C.libFile("*"), "*.dep",$buildDir]+$ccs;
    }
 
    target {
@@ -59,7 +59,7 @@ make {
       
       deb {
          build();
-         make("deb");
+         makeDeb();
       }
       
       clean {
@@ -110,6 +110,42 @@ make {
          if ( older( $plib, pos ))
             $Cpp.link( $plib, pos );
       }
+
+      makeDeb() {
+         Deb := tool("Deb");
+         Dox := tool("Dox");
+         mkdir( $buildDir );
+         // copy libs
+         blDir := path( $buildDir, "usr/lib" );
+         mkdir( blDir );
+         foreach ( l | [$clib,$plib] )
+            copy( l, path( blDir, l ));
+         // copy headers
+         biDir := path( $buildDir, "usr/include" );
+         mkdir( biDir );
+         foreach ( h | $hs+$hps )
+            copy( h, path( biDir, h ));
+         // create description
+         bdDir := path( $buildDir, "DEBIAN" );
+         mkdir( bdDir );
+         Dox.read("docs/desc.dox");
+         Dox.set("outType","txt");
+         ds := replace(Dox.write(), "\n", "\n " );
+         // create DEBIAN/control
+         cnt := [
+            "Package: "+$name,
+            "Version: "+$ver,
+            "Architecture: "+Deb.arch( arch() ),
+            "Maintainer: "+$author+" <"+$gitUrl+">",
+            "Description: "+ds
+         ];
+         saveFile( path( bdDir, "control" ), implode("\n",cnt) );
+         // build package
+         Deb.build( $buildDir );
+      }
+   }
+
+
    }
    
 }   

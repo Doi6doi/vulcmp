@@ -34,6 +34,10 @@ Shorthand for C string
 Scorer function for vulcmp
 </div>
 <div class="br"></div><div class="part tocItem">
+<code><a href="#_Flags">_Flags</a></code>
+Flags for vulcomp initialization
+</div>
+<div class="br"></div><div class="part tocItem">
 <code><a href="#Vulcomp">Vulcomp</a></code>
 Vulcmp system
 </div>
@@ -77,17 +81,18 @@ Negative score items will not be chosen.<div class="br"></div><div class="part p
 </div>
 
 </div>
-<div class="hr"></div><div class="part">
-Flags for vulcomp initialization
+<div class="hr"></div><div class="part enum" id="_Flags">
+<pre><code>enum _Flags</code></pre>
+<div class="br"></div>Flags for vulcomp initialization<div class="br"></div><div class="part enumitem">
+<code>VALIDATION</code> Use validation layer. It will show messages about Vulkan errors
 </div>
-<div class="hr"></div><div class="part">
-Use validation layer. It will show messages about Vulkan errors
+<div class="br"></div><div class="part enumitem">
+<code>ATOMIC_FLOAT</code> Needed to use atomic float operations in shaders
 </div>
-<div class="hr"></div><div class="part">
-Needed to use atomic float operations in shaders
+<div class="br"></div><div class="part enumitem">
+<code>BIT8</code> Needed to use uint8 and int8 types in shaders
 </div>
-<div class="hr"></div><div class="part">
-Needed to use uint8 and int8 types in shaders
+
 </div>
 <div class="hr"></div><div class="part cls" id="Vulcomp">
 <pre><code>class Vulcomp</code></pre>
@@ -234,23 +239,24 @@ Usually faster than memcpy because data is not synced with CPU<div class="br"></
 <div class="hr"></div><div class="part cls" id="Task">
 <pre><code>class Task</code></pre>
 <div class="br"></div>Task (subprogram) to run on GPU<div class="br"></div><div class="parts">
-<div class="part">
-Create new task<div class="br"></div><div class="part param">
+<div class="part func" id="Task.Task">
+<pre><code>Task( Vulcomp & v, void * data, uint64_t size, Str entry, uint32_t nstorage, uint32_t constsize )</code></pre>
+<div class="br"></div>Create new task<div class="br"></div><div class="part param">
 <code>v</code> Vulcmp system
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>data</code> Address of <a href="https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html">SPIR-V</a> compute module
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>size</code> Size of <code>data</code> in bytes
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>entry</code> Name of executable function in <code>data</code>
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>nstorage</code> Number of storages used by task
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>constsize</code> Size of constant data in bytes
 </div>
 
@@ -278,20 +284,21 @@ Create new task<div class="br"></div><div class="part param">
 <pre><code>~Task()</code></pre>
 <div class="br"></div>Dispose task
 </div>
-<div class="hr"></div><div class="part">
-Setup task before first run<div class="br"></div><div class="part param">
+<div class="hr"></div><div class="part func" id="Task.setup">
+<pre><code>void setup( Storage * storages, uint32_t gx, uint32_t gy, uint32_t gz, void * constants )</code></pre>
+<div class="br"></div>Setup task before first run<div class="br"></div><div class="part param">
 <code>storages</code> Handles of storages used by task
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>gx</code> Number of groups on X coordinate
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>gy</code> Number of groups on Y coordinate
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>gz</code> Number of groups on Z coordinate
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>constants</code> Constant values for the task
 </div>
 

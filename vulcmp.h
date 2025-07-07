@@ -43,7 +43,7 @@ typedef struct Vcp_Storage * VcpStorage;
 typedef struct Vcp_Task * VcpTask;
 
 /// Flags for vulcomp initialization
-typedef enum {
+typedef enum Vcp_Flags {
    /// Use validation layer. It will show messages about Vulkan errors
    VCP_VALIDATION=1,
    /// Needed to use atomic float operations in shaders
@@ -85,7 +85,7 @@ typedef struct Vcp_Scorers {
 } * VcpScorers;
 
 /// Vulcmp error values
-typedef enum {
+typedef enum Vcp_Result {
    /// Successful execution
    VCP_SUCCESS    = 0,
    /// Timeout during [#vcp_task_wait]
@@ -177,8 +177,8 @@ Usually faster than memcpy because data is not synced with CPU
 \param di Index of first copied byte in `dst`
 \param count Number of bytes to copy
 \return `true` on success */
-bool vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, uint32_t di,
-   uint32_t count );
+bool vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, \
+   uint32_t di, uint32_t count );
 
 /** Create a GPU task
 \param v Vulcmp handle
@@ -188,8 +188,8 @@ bool vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, uint32_t di,
 \param nstorage Number of storages used by task
 \param constsize Size of constant data in bytes
 \return Task handle or NULL on error */
-VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, VcpStr entry,
-   uint32_t nstorage, uint32_t constsize );
+VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, \
+   VcpStr entry, uint32_t nstorage, uint32_t constsize );
 
 /** Create a GPU task by file
 \param v Vulcmp handle
@@ -198,8 +198,8 @@ VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, VcpStr entry,
 \param nstorage Number of storages used by task
 \param constsize Size of constant data in bytes
 \return Task handle or NULL on error */
-VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry,
-   uint32_t nstorage, uint32_t constsize );
+VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, \
+   VcpStr entry, uint32_t nstorage, uint32_t constsize );
 
 /** Setup task before first run
 \param t Task handle
@@ -208,7 +208,7 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry,
 \param gy Number of groups on Y coordinate
 \param gz Number of groups on Z coordinate
 \param constants Constant values for the task */
-void vcp_task_setup( VcpTask t, VcpStorage * storages,
+void vcp_task_setup( VcpTask t, VcpStorage * storages, \
    uint32_t gx, uint32_t gy, uint32_t gz, void * constants );
 
 /** Setup multi-run task.

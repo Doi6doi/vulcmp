@@ -36,7 +36,7 @@ typedef int32_t (* Scorer )( void * x );
 
 
 /// Flags for vulcomp initialization
-typedef enum {
+typedef enum _Flags {
    /// Use validation layer. It will show messages about Vulkan errors
    VALIDATION=1,
    /// Needed to use atomic float operations in shaders
@@ -147,7 +147,7 @@ public:
    \param entry Name of executable function in `data`
    \param nstorage Number of storages used by task
    \param constsize Size of constant data in bytes */
-   Task( Vulcomp & v, void * data, uint64_t size, Str entry,
+   Task( Vulcomp & v, void * data, uint64_t size, Str entry, \
       uint32_t nstorage, uint32_t constsize );
 
    /** Create a GPU task by file
@@ -167,7 +167,7 @@ public:
    \param gy Number of groups on Y coordinate
    \param gz Number of groups on Z coordinate
    \param constants Constant values for the task */
-   void setup( Storage * storages, uint32_t gx, uint32_t gy, uint32_t gz,
+   void setup( Storage * storages, uint32_t gx, uint32_t gy, uint32_t gz, \
       void * constants );
 
    /** Setup multi-run task.

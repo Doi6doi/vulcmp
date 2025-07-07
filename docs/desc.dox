@@ -1,0 +1,4 @@
+/**
+**Vulcmp** is a simple *C* and *C++* library to make GPU computing
+much easier in your programs. It is a wrapper around the Vulkan library 
+but it is much more simple to learn and use.

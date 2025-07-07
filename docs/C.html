@@ -43,6 +43,10 @@ Opaque type for a GPU-usable memory
 Opaque type for a GPU task (subprogram)
 </div>
 <div class="br"></div><div class="part tocItem">
+<code><a href="#Vcp_Flags">Vcp_Flags</a></code>
+Flags for vulcomp initialization
+</div>
+<div class="br"></div><div class="part tocItem">
 <code><a href="#Vcp_Part">Vcp_Part</a></code>
 Configuration datas for one run in a multi-run task.
 </div>
@@ -53,6 +57,10 @@ Scorer function for vulcmp
 <div class="br"></div><div class="part tocItem">
 <code><a href="#Vcp_Scorers">Vcp_Scorers</a></code>
 Collection of predefined scorers
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#Vcp_Result">Vcp_Result</a></code>
+Vulcmp error values
 </div>
 <div class="br"></div><div class="part tocItem">
 <code><a href="#vcp_error">vcp_error</a></code>
@@ -99,6 +107,22 @@ Get storage size
 Dispose storage
 </div>
 <div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_storage_copy">vcp_storage_copy</a></code>
+GPU-copy of a storage part
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_task_create">vcp_task_create</a></code>
+Create a GPU task
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_task_create_file">vcp_task_create_file</a></code>
+Create a GPU task by file
+</div>
+<div class="br"></div><div class="part tocItem">
+<code><a href="#vcp_task_setup">vcp_task_setup</a></code>
+Setup task before first run
+</div>
+<div class="br"></div><div class="part tocItem">
 <code><a href="#vcp_task_parts">vcp_task_parts</a></code>
 Setup multi-run task.
 </div>
@@ -137,17 +161,18 @@ Dispose task
 <pre><code>VcpTask</code></pre>
 <div class="br"></div>Opaque type for a GPU task (subprogram)
 </div>
-<div class="hr"></div><div class="part">
-Flags for vulcomp initialization
+<div class="hr"></div><div class="part enum" id="Vcp_Flags">
+<pre><code>enum Vcp_Flags</code></pre>
+<div class="br"></div>Flags for vulcomp initialization<div class="br"></div><div class="part enumitem">
+<code>VCP_VALIDATION</code> Use validation layer. It will show messages about Vulkan errors
 </div>
-<div class="hr"></div><div class="part">
-Use validation layer. It will show messages about Vulkan errors
+<div class="br"></div><div class="part enumitem">
+<code>VCP_ATOMIC_FLOAT</code> Needed to use atomic float operations in shaders
 </div>
-<div class="hr"></div><div class="part">
-Needed to use atomic float operations in shaders
+<div class="br"></div><div class="part enumitem">
+<code>VCP_BIT8</code> Needed to use uint8 and int8 types in shaders
 </div>
-<div class="hr"></div><div class="part">
-Needed to use uint8 and int8 types in shaders
+
 </div>
 <div class="hr"></div><div class="part record" id="Vcp_Part">
 <pre><code>struct Vcp_Part</code></pre>
@@ -193,44 +218,45 @@ Chooses a usable queue family
 </div>
 
 </div>
-<div class="hr"></div><div class="part">
-Vulcmp error values
+<div class="hr"></div><div class="part enum" id="Vcp_Result">
+<pre><code>enum Vcp_Result</code></pre>
+<div class="br"></div>Vulcmp error values<div class="br"></div><div class="part enumitem">
+<code>VCP_SUCCESS</code> Successful execution
 </div>
-<div class="hr"></div><div class="part">
-Successful execution
+<div class="br"></div><div class="part enumitem">
+<code>VCP_TIMEOUT</code> Timeout during <a href="#vcp_task_wait">vcp_task_wait</a>
 </div>
-<div class="hr"></div><div class="part">
-Timeout during <a href="#vcp_task_wait">vcp_task_wait</a>
+<div class="br"></div><div class="part enumitem">
+<code>VCP_HOSTMEM</code> Not enough host memory
 </div>
-<div class="hr"></div><div class="part">
-Not enough host memory
+<div class="br"></div><div class="part enumitem">
+<code>VCP_NOPHYSICAL</code> No physical device found
 </div>
-<div class="hr"></div><div class="part">
-No physical device found
+<div class="br"></div><div class="part enumitem">
+<code>VCP_NOFAMILY</code> No queue family found
 </div>
-<div class="hr"></div><div class="part">
-No queue family found
+<div class="br"></div><div class="part enumitem">
+<code>VCP_NOMEMORY</code> No GPU memory found
 </div>
-<div class="hr"></div><div class="part">
-No GPU memory found
+<div class="br"></div><div class="part enumitem">
+<code>VCP_NOFILE</code> Cannot open file
 </div>
-<div class="hr"></div><div class="part">
-Cannot open file
+<div class="br"></div><div class="part enumitem">
+<code>VCP_RUNNING</code> Task already running
 </div>
-<div class="hr"></div><div class="part">
-Task already running
+<div class="br"></div><div class="part enumitem">
+<code>VCP_NOGROUP</code> Empty group size given
 </div>
-<div class="hr"></div><div class="part">
-Empty group size given
+<div class="br"></div><div class="part enumitem">
+<code>VCP_NOSTORAGE</code> Empty storage handle given
 </div>
-<div class="hr"></div><div class="part">
-Empty storage handle given
+<div class="br"></div><div class="part enumitem">
+<code>VCP_NOTASK</code> Empty task handle given
 </div>
-<div class="hr"></div><div class="part">
-Empty task handle given
+<div class="br"></div><div class="part enumitem">
+<code>VCP_ADDRESS</code> Storage size mismatch
 </div>
-<div class="hr"></div><div class="part">
-Storage size mismatch
+
 </div>
 <div class="hr"></div><div class="part func" id="vcp_error">
 <pre><code>int vcp_error()</code></pre>
@@ -338,90 +364,94 @@ Usually not needed because <a href="#vcp_done">vcp_done</a> frees used storages.
 </div>
 
 </div>
-<div class="hr"></div><div class="part">
-GPU-copy of a storage part
+<div class="hr"></div><div class="part func" id="vcp_storage_copy">
+<pre><code>bool vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, uint32_t di, uint32_t count )</code></pre>
+<div class="br"></div>GPU-copy of a storage part
 Usually faster than memcpy because data is not synced with CPU<div class="br"></div><div class="part param">
 <code>src</code> Source storage handle
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>dst</code> Destination storage handle
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>si</code> Index of first copied byte in <code>src</code>
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>di</code> Index of first copied byte in <code>dst</code>
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>count</code> Number of bytes to copy
 </div>
-<div class="hr"></div><div class="part return">
+<div class="br"></div><div class="part return">
 <code>return</code> <code>true</code> on success
 </div>
 
 </div>
-<div class="hr"></div><div class="part">
-Create a GPU task<div class="br"></div><div class="part param">
+<div class="hr"></div><div class="part func" id="vcp_task_create">
+<pre><code>VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, VcpStr entry, uint32_t nstorage, uint32_t constsize )</code></pre>
+<div class="br"></div>Create a GPU task<div class="br"></div><div class="part param">
 <code>v</code> Vulcmp handle
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>data</code> Address of <a href="https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html">SPIR-V</a> compute module
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>size</code> Size of <code>data</code> in bytes
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>entry</code> Name of executable function in <code>data</code>
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>nstorage</code> Number of storages used by task
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>constsize</code> Size of constant data in bytes
 </div>
-<div class="hr"></div><div class="part return">
+<div class="br"></div><div class="part return">
 <code>return</code> Task handle or NULL on error
 </div>
 
 </div>
-<div class="hr"></div><div class="part">
-Create a GPU task by file<div class="br"></div><div class="part param">
+<div class="hr"></div><div class="part func" id="vcp_task_create_file">
+<pre><code>VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, VcpStr entry, uint32_t nstorage, uint32_t constsize )</code></pre>
+<div class="br"></div>Create a GPU task by file<div class="br"></div><div class="part param">
 <code>v</code> Vulcmp handle
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>filename</code> Name of file containing <a href="https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html">SPIR-V</a> compute module
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>entry</code> Name of executable function in <code>data</code>
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>nstorage</code> Number of storages used by task
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>constsize</code> Size of constant data in bytes
 </div>
-<div class="hr"></div><div class="part return">
+<div class="br"></div><div class="part return">
 <code>return</code> Task handle or NULL on error
 </div>
 
 </div>
-<div class="hr"></div><div class="part">
-Setup task before first run<div class="br"></div><div class="part param">
+<div class="hr"></div><div class="part func" id="vcp_task_setup">
+<pre><code>void vcp_task_setup( VcpTask t, VcpStorage * storages, uint32_t gx, uint32_t gy, uint32_t gz, void * constants )</code></pre>
+<div class="br"></div>Setup task before first run<div class="br"></div><div class="part param">
 <code>t</code> Task handle
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>storages</code> Handles of storages used by task
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>gx</code> Number of groups on X coordinate
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>gy</code> Number of groups on Y coordinate
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>gz</code> Number of groups on Z coordinate
 </div>
-<div class="hr"></div><div class="part param">
+<div class="br"></div><div class="part param">
 <code>constants</code> Constant values for the task
 </div>
 

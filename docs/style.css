@@ -38,6 +38,7 @@ code {
 .part.field, 
 .part.param, 
 .part.return,
+.part.enumitem,
 .parts {
    margin-left: 2em;
 }

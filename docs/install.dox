@@ -13,6 +13,9 @@ Tools needed to build:
 * a vymake compatible C compiler ([gcc](https://gcc.gnu.org/install/download.html), [clang](https://releases.llvm.org/download.html), [msvc](https://visualstudio.microsoft.com/downloads/), ...)
 * a vymake compatible C++ compiler ([gcc](https://gcc.gnu.org/install/download.html), [clang](https://releases.llvm.org/download.html), [msvc](https://visualstudio.microsoft.com/downloads/), ...)
 
+Additional tools needed to build tests:
+* a vymake compatible Glsl compliler ([glslc](https://github.com/google/shaderc))
+
 ## Installation
 
 Copy the resulting library (`libvulcmp.so`,`libvulcmpp.so` or `vulcmp.dll`,`vulcmpp.dll`) to your default library location.

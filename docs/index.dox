@@ -8,8 +8,10 @@ but it is much more simple to learn and use.
 Both the [C library](C) and the [C++ library](Cpp) define a few
 types for the work and their corresponding functions (methods).
 
+For basic usage, read [Usage].
+
 For fast use, go directly to [Downloads](https://github.com/Doi6doi/vulcmp/releases).
 
-To build manually, read [Install](Install)
+To build manually, read [Install].
 
 This library goes with a free [LICENSE](https://github.com/Doi6doi/vulcmp/blob/main/LICENSE).
