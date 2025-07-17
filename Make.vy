@@ -10,7 +10,7 @@ make {
       $pdep := "p.dep";
 
       $C := tool( "C", {libMode:true} );
-      $Cpp := tool( "Cpp", { libMode:true});
+      $Cpp := tool( "Cpp", { libMode:true, std:"c++20", show:true});
       
       $clib := $C.libFile( $name );
       $plib := $Cpp.libFile( $name+"p" );

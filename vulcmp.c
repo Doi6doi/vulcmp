@@ -719,9 +719,9 @@ static void vcp_create_command( VcpTask t ) {
    VkCommandBufferAllocateInfo cai = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
       .pNext = NULL,
-      t->vulcomp->commands,
-      VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-      1
+      .commandPool = t->vulcomp->commands,
+      .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+      .commandBufferCount = 1
    };
    vcpResult = vkAllocateCommandBuffers( t->vulcomp->device,
       &cai, &t->command );
