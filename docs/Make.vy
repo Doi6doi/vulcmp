@@ -7,6 +7,8 @@ make {
       $rm := "../README.md";
       $inx := "install.dox";
       $inh := "Install.html";
+      $ux := "usage.dox";
+      $uh := "Usage.html";
       $cs  := "../vulcmp.h";
       $ch  := "C.html";
       $cps := "../vulcmp.hpp";
@@ -24,6 +26,7 @@ make {
          install();
          c();
          cpp();
+         usage();
       }
 
       /// purge generated files
@@ -63,6 +66,13 @@ make {
          links(false);
          if ( older( $cph, $cps ))
             $Dox.build( $cph, $cps );
+      }
+
+      /// build Usage.html
+      usage() {
+         links(false);
+         if ( older( $uh, $ux ))
+            $Dox.build( $uh, $ux );
       }
 
       /// turn full links on or off

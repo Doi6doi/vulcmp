@@ -11,3 +11,4 @@ c.dep
 p.dep
 p_vulcmp.cpp
 ide.txt
+*.deb
