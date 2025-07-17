@@ -9,8 +9,8 @@ make {
       $cdep := "c.dep";
       $pdep := "p.dep";
 
-      $C := tool( "C", {libMode:true} );
-      $Cpp := tool( "Cpp", { libMode:true});
+      $C := tool( "C", {libMode:true, show:true} );
+      $Cpp := tool( "Cpp", { libMode:true, std:"c++20"});
       
       $clib := $C.libFile( $name );
       $plib := $Cpp.libFile( $name+"p" );
@@ -22,6 +22,13 @@ make {
       $buildDir := "build";
       $purge := [$clib,$plib,"*"+$C.objExt(), "*"+$Cpp.objExt(),
          $C.libFile("*"), "*.dep",$buildDir]+$ccs;
+      if ("Windows" = system()) {
+	     $vkDir := getEnv("VULKAN_SDK");
+	     $C.set("libDir",$vkDir+"/Lib");
+	     $C.set("incDir",$vkDir+"/Include");
+	     $Cpp.set("libDir",$vkDir+"/Lib");
+	     $Cpp.set("incDir",$vkDir+"/Include");
+	  }
    }
 
    target {

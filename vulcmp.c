@@ -85,7 +85,7 @@ struct Vcp_Vulcomp {
 static void vcp_trans_init( VcpTransfer t, VcpVulcomp v ) {
    t->vulcomp = v;
    t->command = NULL;
-   t->fence = NULL;
+   t->fence = VK_NULL_HANDLE;
 }
 
 /// transzfer felszámolás
@@ -618,7 +618,7 @@ static VkFence vcp_fence_create( VcpVulcomp v ) {
    };
    VkFence ret;
    vcpResult = vkCreateFence( v->device, &fci, NULL, &ret );
-   return vcpResult ? NULL : ret;
+   return vcpResult ? VK_NULL_HANDLE : ret;
 }
 
 
