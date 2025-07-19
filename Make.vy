@@ -2,7 +2,7 @@ make {
 
    init {
       $name := "vulcmp";
-      $ver := "20250707";
+      $ver := "20250719";
       $gitUrl := "https://github.com/Doi6doi/vulcmp";
       $author := "Várnagy Zoltán";
 
