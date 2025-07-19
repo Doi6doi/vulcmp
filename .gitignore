@@ -15,3 +15,4 @@ ide.txt
 *.lib
 *.exp
 release
+megsem
