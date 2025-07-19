@@ -12,3 +12,6 @@ p.dep
 p_vulcmp.cpp
 ide.txt
 *.deb
+*.lib
+*.exp
+release

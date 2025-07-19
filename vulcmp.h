@@ -20,6 +20,16 @@ the `vcpc` namespace
 
 /** ## Details */
 
+#ifdef _WIN32
+#ifdef VCP_LIB
+#define VCP_EXPORT __declspec(dllexport)
+#else
+#define VCP_EXPORT __declspec(dllimport)
+#endif
+#else
+#define VCP_EXPORT
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -114,60 +124,60 @@ typedef enum Vcp_Result {
 
 /** Error code of last vulcmp function call
 \return Error code ([#VcpResult] or [VkResult](https://registry.khronos.org/vulkan/specs/latest/man/html/VkResult.html))*/
-int vcp_error();
+VCP_EXPORT int vcp_error();
 
 /// Check [#vcp_error] and halt program if not ok
-void vcp_check_fail();
+VCP_EXPORT void vcp_check_fail();
 
 /** Initialize vulcomp system
 Can be called more times if more GPU-s are used.
 \param appName Name of the application (forwarded to vulkan)
 \param flags Or-ed [#VcpFlags] values
 \return Vulcmp handle */
-VcpVulcomp vcp_init( VcpStr appName, uint32_t flags );
+VCP_EXPORT VcpVulcomp vcp_init( VcpStr appName, uint32_t flags );
 
 /** Get Vulcmp creation flags
 \param v Vulcmp handle
 \return Flags used for initialization */
-uint32_t vcp_flags( VcpVulcomp v );
+VCP_EXPORT uint32_t vcp_flags( VcpVulcomp v );
 
 /** Terminate vulcomp system
 \param v Vulcmp handle */
-void vcp_done( VcpVulcomp v );
+VCP_EXPORT void vcp_done( VcpVulcomp v );
 
 /** Set scorer for choosing physical device.
 Must be called before any task or storage creation.
 \param v Vulcmp handle
 \param s Physical device scorer. Called with [VkPhysicalDevice](https://registry.khronos.org/vulkan/specs/latest/man/html/VkPhysicalDevice.html) */
-void vcp_select_physical( VcpVulcomp v, VcpScorer s );
+VCP_EXPORT void vcp_select_physical( VcpVulcomp v, VcpScorer s );
 
 /** Set scorer for choosing queue family.
 Must be called before any task or storage creation.
 \param v Vulcmp handle
 \param s Queue family scorer. Called with [VkQueueFamilyProperties](https://registry.khronos.org/vulkan/specs/latest/man/html/VkQueueFamilyProperties.html) */
-void vcp_select_family( VcpVulcomp v, VcpScorer s );
+VCP_EXPORT void vcp_select_family( VcpVulcomp v, VcpScorer s );
 
 /** Create storage
 Returns NULL on error
 \param v Vulcmp handle
 \param size Memory size in bytes
 \return Storage handle or NULL on error */
-VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size );
+VCP_EXPORT VcpStorage vcp_storage_create( VcpVulcomp v, uint64_t size );
 
 /** Get CPU-address of storage
 \param s Storage handle
 \return Memory address */
-void * vcp_storage_address( VcpStorage s );
+VCP_EXPORT void * vcp_storage_address( VcpStorage s );
 
 /** Get storage size
 \param s Storage handle
 \return Memory size in bytes */
-uint64_t vcp_storage_size( VcpStorage s );
+VCP_EXPORT uint64_t vcp_storage_size( VcpStorage s );
 
 /** Dispose storage
 Usually not needed because [#vcp_done] frees used storages.
 \param s Storage handle */
-void vcp_storage_free( VcpStorage s );
+VCP_EXPORT void vcp_storage_free( VcpStorage s );
 
 /** GPU-copy of a storage part
 Usually faster than memcpy because data is not synced with CPU
@@ -177,7 +187,7 @@ Usually faster than memcpy because data is not synced with CPU
 \param di Index of first copied byte in `dst`
 \param count Number of bytes to copy
 \return `true` on success */
-bool vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, \
+VCP_EXPORT bool vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, \
    uint32_t di, uint32_t count );
 
 /** Create a GPU task
@@ -188,7 +198,7 @@ bool vcp_storage_copy( VcpStorage src, VcpStorage dst, uint32_t si, \
 \param nstorage Number of storages used by task
 \param constsize Size of constant data in bytes
 \return Task handle or NULL on error */
-VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, \
+VCP_EXPORT VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, \
    VcpStr entry, uint32_t nstorage, uint32_t constsize );
 
 /** Create a GPU task by file
@@ -198,7 +208,7 @@ VcpTask vcp_task_create( VcpVulcomp v, void *data, uint64_t size, \
 \param nstorage Number of storages used by task
 \param constsize Size of constant data in bytes
 \return Task handle or NULL on error */
-VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, \
+VCP_EXPORT VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, \
    VcpStr entry, uint32_t nstorage, uint32_t constsize );
 
 /** Setup task before first run
@@ -208,29 +218,29 @@ VcpTask vcp_task_create_file( VcpVulcomp v, VcpStr filename, \
 \param gy Number of groups on Y coordinate
 \param gz Number of groups on Z coordinate
 \param constants Constant values for the task */
-void vcp_task_setup( VcpTask t, VcpStorage * storages, \
+VCP_EXPORT void vcp_task_setup( VcpTask t, VcpStorage * storages, \
    uint32_t gx, uint32_t gy, uint32_t gz, void * constants );
 
 /** Setup multi-run task.
 \param t Task handle
 \param nparts Number of consecutive runs of `t`
 \return Pointer to [#Vcp_Part] array. The values can be modified and will be used on task run. */
-VcpPart vcp_task_parts( VcpTask t, uint32_t nparts );
+VCP_EXPORT VcpPart vcp_task_parts( VcpTask t, uint32_t nparts );
 
 /** Start task on GPU
 \param t Task handle */
-void vcp_task_start( VcpTask t );
+VCP_EXPORT void vcp_task_start( VcpTask t );
 
 /** Wait for task to finish
 \param t Task handle
 \param timeoutMsec Timeout in milliseconds
 \return `true` on success or error, `false` on timeout */
-bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec );
+VCP_EXPORT bool vcp_task_wait( VcpTask t, uint32_t timeoutMsec );
 
 /** Dispose task
 Usually not needed because [#vcp_done] frees up all task resources.
 \param t Task handle */
-void vcp_task_free( VcpTask t );
+VCP_EXPORT void vcp_task_free( VcpTask t );
 
 #ifdef __cplusplus
 }

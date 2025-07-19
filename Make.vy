@@ -9,8 +9,23 @@ make {
       $cdep := "c.dep";
       $pdep := "p.dep";
 
-      $C := tool( "C", {libMode:true, show:true} );
-      $Cpp := tool( "Cpp", { libMode:true, std:"c++20"});
+      case (system()) {
+         "Windows":{
+	    vkDir := getEnv("VULKAN_SDK");
+            libDir := path(vkDir,"Lib");
+            incDir := path(vkDir,"Include");
+            lib := "vulkan-1";
+         }
+         else {
+            libDir := null;
+            incDir := null;
+            lib := "vulkan";
+         }
+      }
+      $C := tool( "C", {libMode:true, 
+         libDir:libDir, incDir:incDir, lib:lib, show:true } );
+      $Cpp := tool( "Cpp", { libMode:true, std:"c++20", 
+         libDir:libDir, incDir:incDir, lib:lib, show:true } );
       
       $clib := $C.libFile( $name );
       $plib := $Cpp.libFile( $name+"p" );
@@ -20,15 +35,8 @@ make {
       $cps := ["vulcmpp.cpp"];
       $ccs := regexp( $cs, "#(.*)\\.c#", "p_\\1.cpp" );
       $buildDir := "build";
-      $purge := [$clib,$plib,"*"+$C.objExt(), "*"+$Cpp.objExt(),
-         $C.libFile("*"), "*.dep",$buildDir]+$ccs;
-      if ("Windows" = system()) {
-	     $vkDir := getEnv("VULKAN_SDK");
-	     $C.set("libDir",$vkDir+"/Lib");
-	     $C.set("incDir",$vkDir+"/Include");
-	     $Cpp.set("libDir",$vkDir+"/Lib");
-	     $Cpp.set("incDir",$vkDir+"/Include");
-	  }
+      $purge := ["*.o", "*.obj","*.dll","*.so",
+         "*.dep",$buildDir, "*.lib", "*.exp"]+$ccs;
    }
 
    target {
@@ -42,8 +50,10 @@ make {
             .item("Clean generated files",clean)
             .item("Test libraries",test)
             .item("Build documentation",docs);
-         if ("Linux" = system())
-            m.item("Create Debian package",deb);
+         case (system()) {
+            "Linux": m.item("Create Debian package",deb);
+            "Windows": m.item("Create Windows zip", wzip);
+         }
          m.exec();
       }
 
@@ -67,6 +77,11 @@ make {
       deb {
          build();
          makeDeb();
+      }
+
+      wzip {
+         build();
+         makeWZip();
       }
       
       clean {
@@ -150,8 +165,18 @@ make {
          // build package
          Deb.build( $buildDir );
       }
-   }
 
+      makeWZip() {
+         Zip := tool("Zip");
+         zf := $name+"_"+$ver+"_win.zip";
+         fs := [$clib,$plib]+$hs+$hps;
+         foreach (l : [$clib,$plib]) {
+            l := changeExt(l,".lib");
+            if ( exists(l))
+               fs += l;
+         }
+         Zip.pack( zf, fs );
+      }
 
    }
    

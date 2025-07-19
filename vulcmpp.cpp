@@ -1,3 +1,5 @@
+#define VCP_LIB
+
 #include "vulcmp.hpp"
 #include "vulcmp.h"
 
@@ -53,21 +55,22 @@ Task::Task( Vulcomp & v, Str filename, Str entry, uint32_t nstorage,
    uint32_t constsize )
 {
    nstor = nstorage;
+   stors = new void * [nstor];
    impl = checkP( vcp_task_create_file( (VcpVulcomp)v.handle(),
       filename, entry, nstor, constsize ));
 }
 
 Task::~Task() {
    vcp_task_free( (VcpTask)impl );
+   delete [] stors;
 }
 
 void Task::setup( Storage * storages, uint32_t gx, uint32_t gy, uint32_t gz,
    void * constants )
 {
-   VcpStorage ss[nstor];
    for (int i=0; i<nstor; ++i)
-      ss[i] = (VcpStorage)storages[i].handle();
-   vcp_task_setup( (VcpTask)impl, ss, gx, gy, gz, constants );
+      stors[i] = storages[i].handle();
+   vcp_task_setup( (VcpTask)impl, (VcpStorage *)stors, gx, gy, gz, constants );
    check();
 }
 

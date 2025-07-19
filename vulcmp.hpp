@@ -19,6 +19,16 @@ All the declarations are in the `vcp` namespace
 
 /** ## Details */
 
+#ifdef _WIN32
+#ifdef VCP_LIB
+#define VCP_EXPORT __declspec(dllexport)
+#else
+#define VCP_EXPORT __declspec(dllimport)
+#endif
+#else
+#define VCP_EXPORT
+#endif
+
 #include <stdint.h>
 
 namespace vcp {
@@ -46,7 +56,7 @@ typedef enum _Flags {
 } Flags;
 
 /// Vulcmp system
-class Vulcomp {
+class VCP_EXPORT Vulcomp {
 protected:
    void * impl;
 public:
@@ -78,7 +88,7 @@ public:
 };
 
 /// GPU-accessible memory
-class Storage {
+class VCP_EXPORT Storage {
 protected:
    void * impl;
 public:
@@ -112,7 +122,7 @@ public:
 };
 
 /// Exception thrown on error
-struct VExc {
+struct VCP_EXPORT VExc {
    /// Error code. See [C library](C)
    int code;
    /** Create new `VExc`.
@@ -122,7 +132,7 @@ struct VExc {
 
 
 /// Configuration datas for one run in a multi-run task.
-struct Part {
+struct VCP_EXPORT Part {
    /// Group count for X coordinate
    uint32_t countX;
    /// Group count for Y coordinate
@@ -135,9 +145,10 @@ struct Part {
 
 
 /// Task (subprogram) to run on GPU
-class Task {
+class VCP_EXPORT Task {
 protected:
    uint32_t nstor;
+   void ** stors;
    void * impl;
 public:
    /** Create new task

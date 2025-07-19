@@ -1,7 +1,8 @@
 make {
 
    init {
-      $Dox := tool("Dox", {linkTail:".html", style:"style.css"});
+      $Dox := tool("Dox", 
+         {omit:"VCP_EXPORT ", linkTail:".html", style:"style.css"});
       $ixx := "index.dox";
       $ixh := "index.html";
       $rm := "../README.md";

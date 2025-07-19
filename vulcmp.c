@@ -1,3 +1,5 @@
+#define VCP_LIB
+
 #include "vulcmp.h"
 
 #ifdef __cplusplus
@@ -719,9 +721,9 @@ static void vcp_create_command( VcpTask t ) {
    VkCommandBufferAllocateInfo cai = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
       .pNext = NULL,
-      t->vulcomp->commands,
-      VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-      1
+      .commandPool = t->vulcomp->commands,
+      .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+      .commandBufferCount = 1
    };
    vcpResult = vkAllocateCommandBuffers( t->vulcomp->device,
       &cai, &t->command );
@@ -850,7 +852,7 @@ VcpTask vcp_task_create( VcpVulcomp v, void * data, uint64_t size,
 	  .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 	  .pNext = NULL,
 	  .flags = 0,
-	  .codeSize = size,
+	  .codeSize = (size_t)size,
 	  .pCode = (uint32_t *)data
    };
    vcpResult = vkCreateShaderModule( v->device, &sci, NULL, &ret->shader );
@@ -997,9 +999,9 @@ bool vcp_trans_prepare( VcpTransfer t, VcpStorage src, VcpStorage dst,
       VkCommandBufferAllocateInfo cai = {
          .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
          .pNext = NULL,
-         t->vulcomp->commands,
-         VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-         1
+         .commandPool = t->vulcomp->commands,
+         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+         .commandBufferCount = 1
       };
       vcpResult = vkAllocateCommandBuffers( t->vulcomp->device,
          &cai, &t->command );
