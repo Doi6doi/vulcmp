@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="part file">
+<div class="part">
+<div class="lbr"></div>
+
+<h1><a href="index.html">Vulcmp</a> Usage</h1>
+<div class="lbr"></div>
+
+The usage scheme is the same in both <a href="C.html">C</a> and <a href="C++.html">C++</a> versions:
+<div class="lbr"></div>
+
+- Initialize the system by creating a <code><a href="Cpp.html#Vulcomp">Vulcomp</a></code> object
+<div class="lbr"></div>
+
+- Create <code><a href="Cpp.html#Storage">Storage</a></code> object(s) for the data
+<div class="lbr"></div>
+
+- Fill storages with data using with the <code><a href="Cpp.html#Storage.address">address</a></code> method
+<div class="lbr"></div>
+
+- Create <code><a href="Cpp.html#Task">Task</a></code> object(s) for the calculation using pre-compiled SPIR-V binaries
+<div class="lbr"></div>
+
+- Connect Tasks with Storages (and optional constant data) using the <code><a href="Cpp.html#Task.setup">setup</a></code> function
+<div class="lbr"></div>
+
+- <code><a href="Cpp.html#Task.start">Start</a></code> tasks and <code><a href="Cpp.html#Task.wait">wait</a></code> for them to finish
+<div class="lbr"></div>
+
+- Read the results using the the <code><a href="Cpp.html#Storage.address">address</a></code> method
+<div class="lbr"></div>
+
+You can find full examples in the test directory
+<div class="lbr"></div>
+
+</div>
+
+</div>
+
+</body></html>

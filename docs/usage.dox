@@ -1,0 +1,21 @@
+/**
+
+# [Vulcmp](index) Usage
+
+The usage scheme is the same in both [C] and [C++] versions:
+
+- Initialize the system by creating a `[Vulcomp](Cpp#Vulcomp)` object
+
+- Create `[Storage](Cpp#Storage)` object(s) for the data
+
+- Fill storages with data using with the `[address](Cpp#Storage.address)` method
+
+- Create `[Task](Cpp#Task)` object(s) for the calculation using pre-compiled SPIR-V binaries
+
+- Connect Tasks with Storages (and optional constant data) using the `[setup](Cpp#Task.setup)` function
+
+- `[Start](Cpp#Task.start)` tasks and `[wait](Cpp#Task.wait)` for them to finish
+
+- Read the results using the the `[address](Cpp#Storage.address)` method
+
+You can find full examples in the test directory
